@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Teacher Portal - Hotspot LMS</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="page">
+    <nav class="topbar">
+      <div class="topbar-inner">
+        <a href="/" class="brand"><span>Hotspot LMS</span></a>
+        <div class="nav-links">
+          <span class="text-sm text-secondary" id="userNameDisplay" style="margin-right: 12px;"></span>
+          <button class="btn btn-sm btn-secondary" onclick="logout()">Logout</button>
+        </div>
+      </div>
+    </nav>
+
+    <div class="tab-shell">
+      <div class="container">
+        <div class="tabs tabs-scroll" id="tabBar">
+          <button class="tab active" data-tab="dashboard">Dashboard</button>
+          <button class="tab" data-tab="courses">Kelas</button>
+          <button class="tab" data-tab="assignments">Soal & Tugas</button>
+          <button class="tab" data-tab="questionbank">Bank Soal</button>
+          <button class="tab" data-tab="gradebook">Gradebook</button>
+          <button class="tab" data-tab="materials">Materi</button>
+          <button class="tab" data-tab="submissions">Submission</button>
+          <button class="tab" data-tab="users">Users</button>
+        </div>
+      </div>
+    </div>
+
+    <main class="container mt-lg">
+      <section id="sec-dashboard" class="tab-section">
+        <div class="dashboard-hero">
+          <div>
+            <div class="badge badge-info mb-md">Moodle-like v1</div>
+            <h1>Dashboard LMS</h1>
+            <p class="text-secondary mt-sm">Kelola kelas, aktivitas, bank soal, materi, dan nilai dari satu panel offline.</p>
+          </div>
+          <div class="dashboard-actions">
+            <button class="btn btn-primary" onclick="switchTab('courses'); showCourseForm()">Buat Kelas</button>
+            <button class="btn btn-secondary" onclick="switchTab('assignments'); showAssignmentBuilder()">Buat Quiz</button>
+          </div>
+        </div>
+
+        <div class="stats-grid mt-lg">
+          <div class="stat-card stat-accent"><div class="stat-value" id="statCourses">0</div><div class="stat-label">Kelas</div></div>
+          <div class="stat-card"><div class="stat-value" id="statAssign">0</div><div class="stat-label">Aktivitas</div></div>
+          <div class="stat-card"><div class="stat-value" id="statBank">0</div><div class="stat-label">Bank Soal</div></div>
+          <div class="stat-card"><div class="stat-value" id="statSubs">0</div><div class="stat-label">Submission</div></div>
+          <div class="stat-card"><div class="stat-value" id="statMats">0</div><div class="stat-label">Materi</div></div>
+          <div class="stat-card"><div class="stat-value" id="statPending">0</div><div class="stat-label">Perlu Dinilai</div></div>
+        </div>
+
+        <div class="dashboard-grid mt-lg">
+          <div class="card">
+            <div class="flex justify-between items-center mb-md">
+              <h3>Kelas Terbaru</h3>
+              <button class="btn btn-sm btn-secondary" onclick="switchTab('courses')">Kelola</button>
+            </div>
+            <div id="recentCourses" class="mini-list"></div>
+          </div>
+          <div class="card">
+            <div class="flex justify-between items-center mb-md">
+              <h3>Submission Terbaru</h3>
+              <button class="btn btn-sm btn-secondary" onclick="switchTab('submissions')">Lihat Semua</button>
+            </div>
+            <div id="recentSubmissions" class="mini-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="sec-courses" class="tab-section hidden">
+        <div class="section-header">
+          <div>
+            <h2>Kelas / Course</h2>
+            <p class="text-sm text-secondary">Course menjadi wadah materi, tugas, quiz, dan gradebook.</p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="showCourseForm()">Tambah Kelas</button>
+        </div>
+
+        <div id="courseFormCard" class="card mb-md hidden">
+          <h3>Kelas Baru</h3>
+          <form id="courseForm" class="flex flex-col gap-md mt-md">
+            <div class="form-grid">
+              <div><label class="text-xs font-bold">Nama Kelas</label><input class="input" id="cTitle" placeholder="Contoh: Informatika Kelas X" required /></div>
+              <div><label class="text-xs font-bold">Kode Kelas</label><input class="input" id="cCode" placeholder="INF-X-01" /></div>
+            </div>
+            <div class="form-grid">
+              <div><label class="text-xs font-bold">Guru</label><input class="input" id="cTeacher" placeholder="Nama guru" /></div>
+              <div><label class="text-xs font-bold">Status</label><select class="select input" id="cArchived"><option value="false">Aktif</option><option value="true">Arsip</option></select></div>
+            </div>
+            <div><label class="text-xs font-bold">Deskripsi</label><textarea class="textarea input" id="cDesc" rows="3"></textarea></div>
+            <button class="btn btn-primary" type="submit">Simpan Kelas</button>
+          </form>
+        </div>
+
+        <div id="courseList" class="course-grid"></div>
+      </section>
+
+      <section id="sec-assignments" class="tab-section hidden">
+        <div class="section-header">
+          <div>
+            <h2>Soal & Tugas</h2>
+            <p class="text-sm text-secondary">Buat assignment atau quiz, hubungkan ke kelas, dan aktifkan auto check.</p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="showAssignmentBuilder()">Buat Aktivitas</button>
+        </div>
+
+        <div id="newAssignForm" class="card assignment-builder mb-md hidden">
+          <div class="builder-top">
+            <div>
+              <h3>Builder Aktivitas</h3>
+              <p class="text-sm text-secondary">Mendukung course, bank soal, quiz setting, dan kunci jawaban.</p>
+            </div>
+            <button class="btn btn-sm btn-secondary" onclick="hideAssignmentBuilder()">Tutup</button>
+          </div>
+
+          <div class="form-grid mt-md">
+            <div><label class="text-xs font-bold">Kelas</label><select class="select input" id="aCourse"></select></div>
+            <div><label class="text-xs font-bold">Tipe Aktivitas</label><select class="select input" id="aActivityType"><option value="assignment">Assignment</option><option value="quiz">Quiz</option></select></div>
+          </div>
+          <div class="form-grid mt-md">
+            <div><label class="text-xs font-bold">Judul</label><input class="input" id="aTitle" placeholder="Contoh: Kuis Bab 1" /></div>
+            <div><label class="text-xs font-bold">Batas Waktu</label><input type="datetime-local" class="input" id="aDue" /></div>
+          </div>
+          <div class="mt-md"><label class="text-xs font-bold">Deskripsi</label><textarea class="textarea input" id="aDesc" rows="3" placeholder="Instruksi singkat untuk siswa..."></textarea></div>
+
+          <div class="settings-grid mt-md">
+            <label class="toggle-row"><span><strong>Auto check</strong><small>Nilai otomatis dari kunci jawaban.</small></span><input type="checkbox" id="aAutoCheck" checked /></label>
+            <label class="toggle-row"><span><strong>Acak soal</strong><small>Urutan soal diacak di halaman siswa.</small></span><input type="checkbox" id="aRandomQuestions" /></label>
+            <label class="toggle-row"><span><strong>Acak pilihan</strong><small>Pilihan ganda diacak.</small></span><input type="checkbox" id="aRandomChoices" /></label>
+          </div>
+          <div class="form-grid mt-md">
+            <div><label class="text-xs font-bold">Timer quiz (menit)</label><input type="number" min="0" class="input" id="aTimeLimit" placeholder="Kosongkan jika tidak ada" /></div>
+            <div><label class="text-xs font-bold">Batas percobaan</label><input type="number" min="0" class="input" id="aAttemptLimit" placeholder="Kosongkan jika bebas" /></div>
+          </div>
+
+          <div class="bank-insert mt-md">
+            <select class="select input" id="questionBankPicker"></select>
+            <button class="btn btn-secondary" onclick="addSelectedBankQuestion()" type="button">Tambah dari Bank Soal</button>
+          </div>
+
+          <div class="builder-divider"></div>
+          <div id="questionBuilder" class="flex flex-col gap-md"></div>
+          <div class="builder-footer">
+            <button class="btn btn-secondary" onclick="addQuestionDraft()" type="button">Tambah Pertanyaan</button>
+            <button class="btn btn-primary" id="saveAssignBtn" type="button">Simpan Aktivitas</button>
+          </div>
+        </div>
+
+        <div class="filter-row mb-md">
+          <select class="select input" id="assignmentCourseFilter" onchange="renderAssignments()"></select>
+        </div>
+        <div id="assignList" class="assignment-list"></div>
+      </section>
+
+      <section id="sec-questionbank" class="tab-section hidden">
+        <div class="section-header">
+          <div>
+            <h2>Bank Soal</h2>
+            <p class="text-sm text-secondary">Simpan soal reusable untuk quiz berikutnya.</p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="toggleForm('questionBankFormCard')">Tambah Soal</button>
+        </div>
+
+        <div id="questionBankFormCard" class="card mb-md hidden">
+          <h3>Soal Bank Baru</h3>
+          <form id="questionBankForm" class="flex flex-col gap-md mt-md">
+            <div class="form-grid">
+              <div><label class="text-xs font-bold">Kategori</label><input class="input" id="qbCategory" value="Umum" /></div>
+              <div><label class="text-xs font-bold">Kesulitan</label><select class="select input" id="qbDifficulty"><option value="easy">Mudah</option><option value="medium" selected>Sedang</option><option value="hard">Sulit</option></select></div>
+            </div>
+            <div class="form-grid">
+              <div><label class="text-xs font-bold">Tipe</label><select class="select input" id="qbType" onchange="toggleBankChoices()"><option value="mcq">Pilihan Ganda</option><option value="essay">Essay / Singkat</option></select></div>
+              <div><label class="text-xs font-bold">Poin</label><input type="number" min="1" class="input" id="qbPoints" value="1" /></div>
+            </div>
+            <div><label class="text-xs font-bold">Pertanyaan</label><textarea class="textarea input" id="qbPrompt" rows="3" required></textarea></div>
+            <div id="qbChoicesGroup"><label class="text-xs font-bold">Pilihan (satu baris satu pilihan)</label><textarea class="textarea input" id="qbChoices" rows="4" placeholder="A. ...&#10;B. ...&#10;C. ..."></textarea></div>
+            <div><label class="text-xs font-bold">Kunci Jawaban</label><input class="input" id="qbAnswer" /></div>
+            <button class="btn btn-primary" type="submit">Simpan ke Bank Soal</button>
+          </form>
+        </div>
+
+        <div id="questionBankList" class="assignment-list"></div>
+      </section>
+
+      <section id="sec-gradebook" class="tab-section hidden">
+        <div class="section-header">
+          <div>
+            <h2>Gradebook</h2>
+            <p class="text-sm text-secondary">Rekap nilai per siswa dan per aktivitas.</p>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="exportGradebookCsv()">Export CSV</button>
+        </div>
+        <div class="filter-row mb-md"><select class="select input" id="gradeCourseFilter" onchange="renderGradebook()"></select></div>
+        <div class="card table-card"><div id="gradebookTable" class="gradebook-wrap"></div></div>
+      </section>
+
+      <section id="sec-materials" class="tab-section hidden">
+        <div class="flex justify-between items-center mb-md">
+           <h2>Materi</h2>
+           <button class="btn btn-primary btn-sm" onclick="toggleForm('newMatForm')">Upload Materi</button>
+        </div>
+        <div id="newMatForm" class="card mb-md hidden">
+           <h3>Upload Materi Baru</h3>
+           <form id="matUploadForm" class="flex flex-col gap-md mt-md">
+             <select class="select input" id="mCourse"></select>
+             <input class="input" id="mTitle" placeholder="Judul Materi" required />
+             <textarea class="textarea input" id="mDesc" placeholder="Deskripsi..."></textarea>
+             <input type="file" class="input" id="mFile" />
+             <button type="submit" class="btn btn-primary">Upload</button>
+           </form>
+        </div>
+        <div class="filter-row mb-md"><select class="select input" id="materialCourseFilter" onchange="renderMaterials()"></select></div>
+        <div id="matList" class="flex flex-col gap-md"></div>
+      </section>
+
+      <section id="sec-submissions" class="tab-section hidden">
+        <div class="flex justify-between items-center mb-md">
+           <h2>Submission</h2>
+           <button class="btn btn-secondary btn-sm" id="refreshBtn">Refresh</button>
+        </div>
+        <div class="filter-row mb-md"><select class="select input" id="submissionCourseFilter" onchange="renderSubmissions()"></select></div>
+        <div class="card table-card">
+           <div class="sub-row sub-row-header"><div>Nama</div><div>ID</div><div>Kelas</div><div>Tugas</div><div>Nilai</div><div></div></div>
+           <div id="subList"></div>
+        </div>
+      </section>
+
+      <section id="sec-users" class="tab-section hidden">
+        <div class="flex justify-between items-center mb-md">
+           <h2>User Management</h2>
+           <button class="btn btn-primary btn-sm" onclick="toggleForm('newUserForm')">Tambah User</button>
+        </div>
+
+        <div id="newUserForm" class="card mb-md hidden">
+           <h3>Tambah User Baru</h3>
+           <form id="userCreateForm" class="flex flex-col gap-md mt-md">
+             <div class="flex gap-md responsive-row">
+               <div style="flex:1"><label class="text-xs">Username</label><input class="input" id="uUsername" required /></div>
+               <div style="flex:1"><label class="text-xs">Password</label><input class="input" id="uPassword" required /></div>
+             </div>
+             <div class="flex gap-md responsive-row">
+               <div style="flex:1"><label class="text-xs">Nama Lengkap</label><input class="input" id="uName" required /></div>
+               <div style="flex:1"><label class="text-xs">Role</label><select class="select input" id="uRole"><option value="student">Student</option><option value="teacher">Teacher</option></select></div>
+             </div>
+             <div id="uStudentIdGroup"><label class="text-xs">NIM / ID Siswa</label><input class="input" id="uStudentId" /></div>
+             <button type="submit" class="btn btn-primary">Simpan User</button>
+           </form>
+        </div>
+
+        <div class="card table-card">
+           <div class="sub-row sub-row-header users-row"><div>Nama</div><div>Username</div><div>Role</div><div>ID</div><div></div></div>
+           <div id="userList"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-overlay" id="gradeModal">
+    <div class="modal">
+      <div class="modal-header flex justify-between"><h3>Nilai Submission</h3><button class="icon-btn" onclick="closeModal('gradeModal')">x</button></div>
+      <div id="modalBody" class="mt-md"></div>
+      <div class="mt-lg pt-lg" style="border-top:1px solid var(--border-subtle)">
+         <div class="flex gap-md responsive-row">
+           <input type="number" class="input" id="gradeInput" placeholder="Nilai (0-100)" />
+           <input class="input" id="feedbackInput" placeholder="Feedback..." />
+         </div>
+         <button class="btn btn-primary mt-md w-full" id="saveGradeBtn">Simpan Nilai</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let allCourses = [];
+    let allAssignments = [];
+    let allSubmissions = [];
+    let allMaterials = [];
+    let allUsers = [];
+    let allBankItems = [];
+    let questionDrafts = [];
+
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
+    document.getElementById('refreshBtn').onclick = loadSubmissions;
+
+    function escapeHtml(value) {
+      return String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;');
+    }
+
+    function formatDate(value) {
+      if (!value) return '-';
+      return new Date(value).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+    }
+
+    function courseTitle(id) {
+      return allCourses.find(c => c.id === id)?.title || 'Tanpa kelas';
+    }
+
+    function assignmentTitle(id) {
+      return allAssignments.find(a => a.id === id)?.title || 'Tanpa judul';
+    }
+
+    function gradeLabel(submission) {
+      if (submission.grade === undefined || submission.grade === null || submission.grade === '') return '<span class="badge badge-warning">Manual</span>';
+      const auto = submission.autoChecked ? '<span class="badge badge-success">Auto</span>' : '';
+      return `<strong>${submission.grade}</strong> ${auto}`;
+    }
+
+    async function fetchCoreData() {
+      const [courses, assignments, submissions, materials, users, bank] = await Promise.all([
+        fetch('/api/courses').then(r => r.json()),
+        fetch('/api/assignments').then(r => r.json()),
+        fetch('/api/submissions/submissions').then(r => r.json()),
+        fetch('/api/materials').then(r => r.json()),
+        fetch('/api/auth/users').then(r => r.json()),
+        fetch('/api/question-bank').then(r => r.json())
+      ]);
+      allCourses = courses;
+      allAssignments = assignments;
+      allSubmissions = submissions;
+      allMaterials = materials;
+      allUsers = users;
+      allBankItems = bank;
+      hydrateSelects();
+    }
+
+    function courseOptions(includeAll = false) {
+      const base = includeAll ? '<option value="">Semua kelas</option>' : '<option value="">Tanpa kelas</option>';
+      return base + allCourses.map(c => `<option value="${c.id}">${escapeHtml(c.title)}</option>`).join('');
+    }
+
+    function hydrateSelects() {
+      ['aCourse', 'mCourse'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = courseOptions(false);
+      });
+      ['assignmentCourseFilter', 'materialCourseFilter', 'submissionCourseFilter', 'gradeCourseFilter'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = courseOptions(true);
+      });
+      const picker = document.getElementById('questionBankPicker');
+      if (picker) {
+        picker.innerHTML = allBankItems.length
+          ? allBankItems.map(item => `<option value="${item.id}">${escapeHtml(item.category || 'Umum')} - ${escapeHtml(item.prompt)}</option>`).join('')
+          : '<option value="">Belum ada bank soal</option>';
+      }
+    }
+
+    async function switchTab(name) {
+      tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+      document.querySelectorAll('.tab-section').forEach(s => s.classList.add('hidden'));
+      document.getElementById('sec-' + name).classList.remove('hidden');
+      await fetchCoreData();
+      if (name === 'dashboard') renderDashboard();
+      if (name === 'courses') renderCourses();
+      if (name === 'assignments') renderAssignments();
+      if (name === 'questionbank') renderQuestionBank();
+      if (name === 'gradebook') renderGradebook();
+      if (name === 'materials') renderMaterials();
+      if (name === 'submissions') renderSubmissions();
+      if (name === 'users') renderUsers();
+    }
+
+    function renderDashboard() {
+      const graded = allSubmissions.filter(item => item.grade !== undefined && item.grade !== null).length;
+      document.getElementById('statCourses').innerText = allCourses.length;
+      document.getElementById('statAssign').innerText = allAssignments.length;
+      document.getElementById('statBank').innerText = allBankItems.length;
+      document.getElementById('statSubs').innerText = allSubmissions.length;
+      document.getElementById('statMats').innerText = allMaterials.length;
+      document.getElementById('statPending').innerText = allSubmissions.length - graded;
+      document.getElementById('recentCourses').innerHTML = allCourses.slice(0, 5).map(c => `
+        <button class="mini-row" onclick="switchTab('courses')"><span><strong>${escapeHtml(c.title)}</strong><small>${escapeHtml(c.code || 'Tidak ada kode')}</small></span><span class="badge ${c.archived ? 'badge-warning' : 'badge-success'}">${c.archived ? 'Arsip' : 'Aktif'}</span></button>
+      `).join('') || '<p class="text-sm text-muted">Belum ada kelas.</p>';
+      document.getElementById('recentSubmissions').innerHTML = allSubmissions.slice(0, 5).map(s => `
+        <button class="mini-row" onclick="openGradeModal('${s.id}')"><span><strong>${escapeHtml(s.studentName || s.studentId)}</strong><small>${escapeHtml(assignmentTitle(s.assignmentId))}</small></span><span>${gradeLabel(s)}</span></button>
+      `).join('') || '<p class="text-sm text-muted">Belum ada submission.</p>';
+    }
+
+    function showCourseForm() {
+      document.getElementById('courseFormCard').classList.remove('hidden');
+      document.getElementById('cTitle').focus();
+    }
+
+    document.getElementById('courseForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const payload = {
+        title: document.getElementById('cTitle').value.trim(),
+        code: document.getElementById('cCode').value.trim(),
+        teacherName: document.getElementById('cTeacher').value.trim(),
+        archived: document.getElementById('cArchived').value === 'true',
+        description: document.getElementById('cDesc').value.trim()
+      };
+      if (!payload.title) return alert('Nama kelas wajib diisi');
+      await fetch('/api/courses', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      e.target.reset();
+      document.getElementById('courseFormCard').classList.add('hidden');
+      await fetchCoreData();
+      renderCourses();
+      renderDashboard();
+    };
+
+    function renderCourses() {
+      document.getElementById('courseList').innerHTML = allCourses.map(c => {
+        const activityCount = allAssignments.filter(a => a.courseId === c.id).length;
+        const materialCount = allMaterials.filter(m => m.courseId === c.id).length;
+        return `
+          <div class="card course-card">
+            <div class="flex justify-between items-start gap-md">
+              <div>
+                <div class="flex items-center gap-sm wrap-row"><h3>${escapeHtml(c.title)}</h3><span class="badge ${c.archived ? 'badge-warning' : 'badge-success'}">${c.archived ? 'Arsip' : 'Aktif'}</span></div>
+                <p class="text-sm text-secondary mt-xs">${escapeHtml(c.description || '')}</p>
+                <p class="text-xs text-muted mt-xs">Kode: ${escapeHtml(c.code || '-')} | Guru: ${escapeHtml(c.teacherName || '-')}</p>
+              </div>
+              <button class="btn btn-sm btn-danger" onclick="deleteCourse('${c.id}')">Hapus</button>
+            </div>
+            <div class="course-metrics mt-md"><span>${activityCount} aktivitas</span><span>${materialCount} materi</span><span>${allSubmissions.filter(s => s.courseId === c.id).length} submission</span></div>
+          </div>
+        `;
+      }).join('') || '<div class="empty-state">Belum ada kelas.</div>';
+    }
+
+    async function deleteCourse(id) {
+      if (!confirm('Hapus kelas ini? Aktivitas lama tidak dihapus, tetapi kehilangan referensi kelas.')) return;
+      await fetch(`/api/courses/${id}`, { method: 'DELETE' });
+      await fetchCoreData();
+      renderCourses();
+    }
+
+    function newQuestionDraft(type = 'mcq') {
+      return { draftId: Date.now().toString() + Math.random().toString(16).slice(2), type, prompt: '', choices: type === 'mcq' ? ['', ''] : [], answer: '', points: 1 };
+    }
+
+    function showAssignmentBuilder() {
+      document.getElementById('newAssignForm').classList.remove('hidden');
+      if (!questionDrafts.length) questionDrafts = [newQuestionDraft()];
+      hydrateSelects();
+      renderQuestionBuilder();
+      document.getElementById('aTitle').focus();
+    }
+
+    function hideAssignmentBuilder() {
+      document.getElementById('newAssignForm').classList.add('hidden');
+    }
+
+    function syncDraftInputs() {
+      questionDrafts = questionDrafts.map(q => {
+        const root = document.querySelector(`[data-question-id="${q.draftId}"]`);
+        if (!root) return q;
+        return {
+          ...q,
+          type: root.querySelector('.draft-type').value,
+          prompt: root.querySelector('.draft-prompt').value,
+          answer: root.querySelector('.draft-answer').value,
+          points: Number(root.querySelector('.draft-points').value || 1),
+          choices: Array.from(root.querySelectorAll('.choice-input')).map(input => input.value)
+        };
+      });
+    }
+
+    function renderQuestionBuilder() {
+      document.getElementById('questionBuilder').innerHTML = questionDrafts.map((q, idx) => `
+        <div class="question-card" data-question-id="${q.draftId}">
+          <div class="question-card-header">
+            <span class="question-number">${idx + 1}</span>
+            <select class="select input draft-type" onchange="changeQuestionType('${q.draftId}', this.value)">
+              <option value="mcq" ${q.type === 'mcq' ? 'selected' : ''}>Pilihan Ganda</option>
+              <option value="essay" ${q.type === 'essay' ? 'selected' : ''}>Essay / Singkat</option>
+            </select>
+            <input type="number" min="1" class="input draft-points points-input" value="${q.points || 1}" title="Poin" />
+          </div>
+          <textarea class="textarea input draft-prompt" rows="2" placeholder="Tulis pertanyaan...">${escapeHtml(q.prompt)}</textarea>
+          <div class="choice-list ${q.type !== 'mcq' ? 'hidden' : ''}">
+            ${(q.choices || []).map((choice, choiceIdx) => `
+              <div class="choice-row"><span>${String.fromCharCode(65 + choiceIdx)}.</span><input class="input choice-input" value="${escapeHtml(choice)}" placeholder="Pilihan jawaban" /><button class="btn btn-sm btn-secondary" onclick="removeChoice('${q.draftId}', ${choiceIdx})">Hapus</button></div>
+            `).join('')}
+            <button class="btn btn-sm btn-secondary" onclick="addChoice('${q.draftId}')">Tambah Pilihan</button>
+          </div>
+          <div class="answer-key-row">
+            <input class="input draft-answer" value="${escapeHtml(q.answer)}" placeholder="Kunci jawaban untuk auto check" />
+            <button class="btn btn-sm btn-secondary" onclick="saveDraftToBank('${q.draftId}')">Simpan ke Bank</button>
+            <button class="btn btn-sm btn-secondary" onclick="duplicateQuestion('${q.draftId}')">Duplikat</button>
+            <button class="btn btn-sm btn-danger" onclick="removeQuestionDraft('${q.draftId}')">Hapus</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function addQuestionDraft() { syncDraftInputs(); questionDrafts.push(newQuestionDraft()); renderQuestionBuilder(); }
+    function removeQuestionDraft(id) { syncDraftInputs(); questionDrafts = questionDrafts.filter(q => q.draftId !== id); if (!questionDrafts.length) questionDrafts.push(newQuestionDraft()); renderQuestionBuilder(); }
+    function duplicateQuestion(id) { syncDraftInputs(); const q = questionDrafts.find(item => item.draftId === id); if (q) questionDrafts.push({ ...q, draftId: Date.now().toString() + Math.random().toString(16).slice(2) }); renderQuestionBuilder(); }
+    function changeQuestionType(id, type) { syncDraftInputs(); questionDrafts = questionDrafts.map(q => q.draftId === id ? { ...q, type, choices: type === 'mcq' ? (q.choices.length ? q.choices : ['', '']) : [] } : q); renderQuestionBuilder(); }
+    function addChoice(id) { syncDraftInputs(); questionDrafts = questionDrafts.map(q => q.draftId === id ? { ...q, choices: [...(q.choices || []), ''] } : q); renderQuestionBuilder(); }
+    function removeChoice(id, index) { syncDraftInputs(); questionDrafts = questionDrafts.map(q => q.draftId === id ? { ...q, choices: q.choices.filter((_, i) => i !== index) } : q); renderQuestionBuilder(); }
+
+    async function saveDraftToBank(id) {
+      syncDraftInputs();
+      const q = questionDrafts.find(item => item.draftId === id);
+      if (!q || !q.prompt.trim()) return alert('Pertanyaan wajib diisi sebelum disimpan ke bank');
+      await fetch('/api/question-bank', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...q, category: 'Dari Tugas', difficulty: 'medium', choices: q.type === 'mcq' ? q.choices.map(c => c.trim()).filter(Boolean) : [] }) });
+      await fetchCoreData();
+      alert('Soal tersimpan ke bank soal');
+    }
+
+    function addSelectedBankQuestion() {
+      const id = document.getElementById('questionBankPicker').value;
+      const item = allBankItems.find(q => q.id === id);
+      if (!item) return alert('Pilih soal dari bank terlebih dahulu');
+      syncDraftInputs();
+      questionDrafts.push({ draftId: Date.now().toString() + Math.random().toString(16).slice(2), type: item.type, prompt: item.prompt, choices: item.choices || [], answer: item.answer || '', points: item.points || 1 });
+      renderQuestionBuilder();
+    }
+
+    document.getElementById('saveAssignBtn').onclick = async () => {
+      syncDraftInputs();
+      const title = document.getElementById('aTitle').value.trim();
+      const questions = questionDrafts.filter(q => q.prompt.trim()).map(q => ({ type: q.type, prompt: q.prompt.trim(), choices: q.type === 'mcq' ? q.choices.map(c => c.trim()).filter(Boolean) : [], answer: q.answer.trim(), points: q.points || 1 }));
+      const payload = {
+        courseId: document.getElementById('aCourse').value,
+        activityType: document.getElementById('aActivityType').value,
+        title,
+        description: document.getElementById('aDesc').value.trim(),
+        dueDate: document.getElementById('aDue').value,
+        autoCheck: document.getElementById('aAutoCheck').checked,
+        randomizeQuestions: document.getElementById('aRandomQuestions').checked,
+        randomizeChoices: document.getElementById('aRandomChoices').checked,
+        timeLimitMinutes: document.getElementById('aTimeLimit').value,
+        attemptLimit: document.getElementById('aAttemptLimit').value,
+        questions
+      };
+      if (!title) return alert('Judul wajib diisi');
+      if (!questions.length) return alert('Tambahkan minimal satu pertanyaan');
+      if (payload.autoCheck && !questions.some(q => q.answer)) return alert('Isi minimal satu kunci jawaban untuk auto check');
+      const res = await fetch('/api/assignments', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      if (!res.ok) return alert('Gagal menyimpan aktivitas');
+      alert('Aktivitas berhasil disimpan');
+      resetAssignmentBuilder();
+      hideAssignmentBuilder();
+      await fetchCoreData();
+      renderAssignments();
+    };
+
+    function resetAssignmentBuilder() {
+      ['aTitle', 'aDesc', 'aDue', 'aTimeLimit', 'aAttemptLimit'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('aAutoCheck').checked = true;
+      document.getElementById('aRandomQuestions').checked = false;
+      document.getElementById('aRandomChoices').checked = false;
+      questionDrafts = [newQuestionDraft()];
+      renderQuestionBuilder();
+    }
+
+    function renderAssignments() {
+      const selected = document.getElementById('assignmentCourseFilter').value;
+      const items = selected ? allAssignments.filter(a => a.courseId === selected) : allAssignments;
+      document.getElementById('assignList').innerHTML = items.map(a => `
+        <div class="card assignment-card">
+          <div class="assignment-card-main">
+            <div>
+              <div class="flex items-center gap-sm wrap-row">
+                <strong>${escapeHtml(a.title)}</strong>
+                <span class="badge badge-info">${escapeHtml(courseTitle(a.courseId))}</span>
+                <span class="badge ${a.activityType === 'quiz' ? 'badge-success' : 'badge-warning'}">${a.activityType === 'quiz' ? 'Quiz' : 'Assignment'}</span>
+                ${a.autoCheck ? '<span class="badge badge-success">Auto check</span>' : '<span class="badge badge-warning">Manual</span>'}
+                <span class="badge badge-info">${(a.questions || []).length} soal</span>
+              </div>
+              <p class="text-sm text-secondary mt-xs">${escapeHtml(a.description || '')}</p>
+              ${a.dueDate ? `<p class="text-xs text-muted mt-xs">Deadline: ${formatDate(a.dueDate)}</p>` : ''}
+            </div>
+            <button class="btn btn-sm btn-danger" onclick="deleteAssignment('${a.id}')">Hapus</button>
+          </div>
+          ${(a.questions || []).length ? `<div class="question-summary mt-md">${a.questions.map((q, idx) => `<div class="question-summary-row"><span>${idx + 1}. ${escapeHtml(q.prompt)}</span><div class="flex gap-sm items-center"><span class="badge ${q.type === 'mcq' ? 'badge-info' : 'badge-warning'}">${q.type === 'mcq' ? 'PG' : 'Essay'}</span>${q.answer ? '<span class="badge badge-success">Kunci</span>' : ''}</div></div>`).join('')}</div>` : '<p class="text-sm text-muted mt-md">Belum ada soal.</p>'}
+        </div>
+      `).join('') || '<div class="empty-state">Belum ada aktivitas.</div>';
+    }
+
+    async function deleteAssignment(id) {
+      if (!confirm('Hapus aktivitas ini?')) return;
+      await fetch(`/api/assignments/${id}`, { method: 'DELETE' });
+      await fetchCoreData();
+      renderAssignments();
+    }
+
+    function toggleBankChoices() {
+      document.getElementById('qbChoicesGroup').classList.toggle('hidden', document.getElementById('qbType').value !== 'mcq');
+    }
+
+    document.getElementById('questionBankForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const type = document.getElementById('qbType').value;
+      const payload = {
+        category: document.getElementById('qbCategory').value.trim() || 'Umum',
+        difficulty: document.getElementById('qbDifficulty').value,
+        type,
+        prompt: document.getElementById('qbPrompt').value.trim(),
+        choices: type === 'mcq' ? document.getElementById('qbChoices').value.split('\n').map(s => s.trim()).filter(Boolean) : [],
+        answer: document.getElementById('qbAnswer').value.trim(),
+        points: Number(document.getElementById('qbPoints').value || 1)
+      };
+      if (!payload.prompt) return alert('Pertanyaan wajib diisi');
+      await fetch('/api/question-bank', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      e.target.reset();
+      document.getElementById('qbCategory').value = 'Umum';
+      document.getElementById('qbPoints').value = '1';
+      document.getElementById('questionBankFormCard').classList.add('hidden');
+      await fetchCoreData();
+      renderQuestionBank();
+    };
+
+    function renderQuestionBank() {
+      document.getElementById('questionBankList').innerHTML = allBankItems.map(item => `
+        <div class="card assignment-card">
+          <div class="assignment-card-main">
+            <div>
+              <div class="flex gap-sm items-center wrap-row"><strong>${escapeHtml(item.prompt)}</strong><span class="badge badge-info">${escapeHtml(item.category || 'Umum')}</span><span class="badge badge-warning">${escapeHtml(item.difficulty || 'medium')}</span><span class="badge ${item.type === 'mcq' ? 'badge-info' : 'badge-success'}">${item.type === 'mcq' ? 'PG' : 'Essay'}</span></div>
+              ${item.choices?.length ? `<p class="text-xs text-muted mt-xs">${escapeHtml(item.choices.join(' | '))}</p>` : ''}
+              ${item.answer ? `<p class="text-xs text-muted mt-xs">Kunci: ${escapeHtml(item.answer)}</p>` : ''}
+            </div>
+            <div class="flex gap-sm wrap-row"><button class="btn btn-sm btn-secondary" onclick="useBankQuestion('${item.id}')">Pakai</button><button class="btn btn-sm btn-danger" onclick="deleteBankQuestion('${item.id}')">Hapus</button></div>
+          </div>
+        </div>
+      `).join('') || '<div class="empty-state">Bank soal masih kosong.</div>';
+    }
+
+    function useBankQuestion(id) {
+      switchTab('assignments');
+      setTimeout(() => {
+        showAssignmentBuilder();
+        document.getElementById('questionBankPicker').value = id;
+        addSelectedBankQuestion();
+      }, 100);
+    }
+
+    async function deleteBankQuestion(id) {
+      if (!confirm('Hapus soal dari bank?')) return;
+      await fetch(`/api/question-bank/${id}`, { method: 'DELETE' });
+      await fetchCoreData();
+      renderQuestionBank();
+    }
+
+    function gradebookRows() {
+      const selected = document.getElementById('gradeCourseFilter').value;
+      const assignments = (selected ? allAssignments.filter(a => a.courseId === selected) : allAssignments).filter(a => (a.questions || []).length || a.activityType === 'assignment');
+      const studentsById = new Map();
+      allUsers.filter(u => u.role === 'student').forEach(u => studentsById.set(u.studentId || u.username, { id: u.studentId || u.username, name: u.name || u.username }));
+      allSubmissions.forEach(s => studentsById.set(s.studentId, { id: s.studentId, name: s.studentName || s.studentId }));
+      const students = Array.from(studentsById.values()).sort((a, b) => a.name.localeCompare(b.name));
+      return { assignments, students };
+    }
+
+    function latestSubmission(studentId, assignmentId) {
+      return allSubmissions.filter(s => s.studentId === studentId && s.assignmentId === assignmentId).sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime())[0];
+    }
+
+    function renderGradebook() {
+      const { assignments, students } = gradebookRows();
+      const header = `<tr><th>Siswa</th>${assignments.map(a => `<th>${escapeHtml(a.title)}</th>`).join('')}<th>Rata-rata</th></tr>`;
+      const rows = students.map(student => {
+        const grades = assignments.map(a => latestSubmission(student.id, a.id)?.grade);
+        const numeric = grades.filter(g => g !== undefined && g !== null && g !== '').map(Number);
+        const avg = numeric.length ? Math.round(numeric.reduce((a, b) => a + b, 0) / numeric.length) : '-';
+        return `<tr><td><strong>${escapeHtml(student.name)}</strong><small>${escapeHtml(student.id)}</small></td>${grades.map(g => `<td>${g ?? '-'}</td>`).join('')}<td><strong>${avg}</strong></td></tr>`;
+      }).join('');
+      document.getElementById('gradebookTable').innerHTML = assignments.length ? `<table class="grade-table">${header}${rows || '<tr><td colspan="99">Belum ada siswa/submission.</td></tr>'}</table>` : '<div class="empty-state">Belum ada aktivitas untuk gradebook.</div>';
+    }
+
+    function exportGradebookCsv() {
+      const { assignments, students } = gradebookRows();
+      const lines = [['Student ID', 'Nama', ...assignments.map(a => a.title), 'Rata-rata']];
+      students.forEach(student => {
+        const grades = assignments.map(a => latestSubmission(student.id, a.id)?.grade ?? '');
+        const numeric = grades.filter(g => g !== '').map(Number);
+        const avg = numeric.length ? Math.round(numeric.reduce((a, b) => a + b, 0) / numeric.length) : '';
+        lines.push([student.id, student.name, ...grades, avg]);
+      });
+      const csv = lines.map(row => row.map(cell => `"${String(cell).replaceAll('"', '""')}"`).join(',')).join('\n');
+      const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'gradebook.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    async function loadMaterials() { await fetchCoreData(); renderMaterials(); }
+    function renderMaterials() {
+      const selected = document.getElementById('materialCourseFilter').value;
+      const items = selected ? allMaterials.filter(m => m.courseId === selected) : allMaterials;
+      document.getElementById('matList').innerHTML = items.map(m => {
+        let previewHtml = '';
+        if (m.fileName) {
+          const ext = m.fileName.split('.').pop().toLowerCase();
+          const url = `/uploads/${m.filePath}`;
+          if (ext === 'mp4') previewHtml = `<div class="mt-md video-frame"><video controls><source src="${url}" type="video/mp4">Browser Anda tidak mendukung preview video.</video></div>`;
+        }
+        return `<div class="card mb-md"><div class="flex justify-between items-start responsive-row"><div style="flex:1"><div class="flex gap-sm items-center wrap-row"><strong style="font-size:1.1rem">${escapeHtml(m.title)}</strong><span class="badge badge-info">${escapeHtml(courseTitle(m.courseId))}</span></div>${m.description ? `<p class="text-sm text-secondary mt-xs">${escapeHtml(m.description)}</p>` : ''}${m.fileName ? `<div class="mt-sm"><a href="/uploads/${m.filePath}" target="_blank" class="text-accent text-xs font-bold">Download: ${escapeHtml(m.fileName)}</a></div>` : ''}${previewHtml}</div><button class="btn btn-sm btn-danger" onclick="deleteMat('${m.id}')">Hapus</button></div></div>`;
+      }).join('') || '<p class="text-center text-muted">Belum ada materi.</p>';
+    }
+
+    async function deleteMat(id) {
+      if (!confirm('Hapus materi ini?')) return;
+      await fetch(`/api/materials/${id}`, { method: 'DELETE' });
+      await fetchCoreData();
+      renderMaterials();
+    }
+
+    document.getElementById('matUploadForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const btn = e.target.querySelector('button[type="submit"]');
+      const originalText = btn.innerText;
+      btn.innerText = 'Uploading...';
+      btn.disabled = true;
+      const fd = new FormData();
+      fd.append('courseId', document.getElementById('mCourse').value);
+      fd.append('title', document.getElementById('mTitle').value);
+      fd.append('description', document.getElementById('mDesc').value);
+      if (document.getElementById('mFile').files.length > 0) fd.append('file', document.getElementById('mFile').files[0]);
+      try {
+        const res = await fetch('/api/materials', { method: 'POST', body: fd });
+        if (!res.ok) throw new Error('Server error ' + res.status);
+        e.target.reset();
+        toggleForm('newMatForm');
+        await fetchCoreData();
+        renderMaterials();
+      } catch (err) {
+        alert('Gagal upload materi: ' + err.message);
+      } finally {
+        btn.innerText = originalText;
+        btn.disabled = false;
+      }
+    };
+
+    async function loadSubmissions() { await fetchCoreData(); renderSubmissions(); }
+    function renderSubmissions() {
+      const selected = document.getElementById('submissionCourseFilter').value;
+      const items = selected ? allSubmissions.filter(s => s.courseId === selected) : allSubmissions;
+      document.getElementById('subList').innerHTML = items.map(s => `
+        <div class="sub-row" onclick="openGradeModal('${s.id}')">
+          <div><strong>${escapeHtml(s.studentName || '-')}</strong></div>
+          <div>${escapeHtml(s.studentId)}</div>
+          <div>${escapeHtml(courseTitle(s.courseId))}</div>
+          <div class="truncate">${escapeHtml(assignmentTitle(s.assignmentId))}</div>
+          <div>${gradeLabel(s)}</div>
+          <button class="btn btn-sm btn-secondary">Nilai</button>
+        </div>
+      `).join('') || '<div class="empty-state">Belum ada submission.</div>';
+    }
+
+    function answerListHtml(submission, assignment) {
+      if (!assignment?.questions?.length) return '';
+      const answers = new Map((submission.answers || []).map(item => [item.questionId, item.answer]));
+      return `<div class="answer-review mt-md">${assignment.questions.map((q, idx) => {
+        const answer = answers.get(q.id) || '-';
+        const isKeyed = q.answer;
+        const isCorrect = isKeyed && String(answer).trim().toLowerCase() === String(q.answer).trim().toLowerCase();
+        return `<div class="answer-row"><div><strong>${idx + 1}. ${escapeHtml(q.prompt)}</strong><p class="text-sm text-secondary">Jawaban: ${escapeHtml(answer)}</p>${isKeyed ? `<p class="text-xs text-muted">Kunci: ${escapeHtml(q.answer)}</p>` : ''}</div>${isKeyed ? `<span class="badge ${isCorrect ? 'badge-success' : 'badge-warning'}">${isCorrect ? 'Benar' : 'Cek'}</span>` : ''}</div>`;
+      }).join('')}</div>`;
+    }
+
+    function openGradeModal(id) {
+      const s = allSubmissions.find(x => x.id === id);
+      const a = allAssignments.find(x => x.id === s.assignmentId);
+      document.getElementById('modalBody').innerHTML = `
+        <p><strong>Siswa:</strong> ${escapeHtml(s.studentName)} (${escapeHtml(s.studentId)})</p>
+        <p><strong>Kelas:</strong> ${escapeHtml(courseTitle(s.courseId))}</p>
+        <p><strong>Tugas:</strong> ${escapeHtml(a?.title || '')}</p>
+        ${s.autoChecked ? `<p class="mt-sm"><span class="badge badge-success">Auto check</span> ${escapeHtml(s.feedback || '')}</p>` : ''}
+        ${answerListHtml(s, a)}
+        ${s.content ? `<div class="card mt-md" style="background:#f1f5f9">${escapeHtml(s.content)}</div>` : ''}
+        ${s.fileName ? `<a href="/uploads/${s.filePath}" target="_blank" class="btn btn-sm btn-secondary mt-md">Lihat File: ${escapeHtml(s.fileName)}</a>` : ''}
+      `;
+      document.getElementById('gradeInput').value = s.grade ?? '';
+      document.getElementById('feedbackInput').value = s.feedback ?? '';
+      document.getElementById('gradeModal').classList.add('show');
+      window.currentSubId = id;
+    }
+
+    document.getElementById('saveGradeBtn').onclick = async () => {
+      await fetch(`/api/submissions/${window.currentSubId}/grade`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ grade: document.getElementById('gradeInput').value, feedback: document.getElementById('feedbackInput').value }) });
+      closeModal('gradeModal');
+      await fetchCoreData();
+      renderSubmissions();
+      renderGradebook();
+    };
+
+    function renderUsers() {
+      document.getElementById('userList').innerHTML = allUsers.map(u => `
+        <div class="sub-row users-row">
+          <div><strong>${escapeHtml(u.name)}</strong></div>
+          <div>${escapeHtml(u.username)}</div>
+          <div><span class="badge ${u.role === 'teacher' ? 'badge-info' : 'badge-success'}">${escapeHtml(u.role)}</span></div>
+          <div>${escapeHtml(u.studentId || '-')}</div>
+          <button class="btn btn-sm btn-danger" onclick="deleteUser('${u.id}')">Hapus</button>
+        </div>
+      `).join('');
+    }
+
+    async function deleteUser(id) {
+      if (id === 'admin') return alert('Admin default tidak bisa dihapus');
+      if (!confirm('Hapus user ini?')) return;
+      await fetch(`/api/auth/users/${id}`, { method: 'DELETE' });
+      await fetchCoreData();
+      renderUsers();
+    }
+
+    document.getElementById('userCreateForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const payload = { username: document.getElementById('uUsername').value, password: document.getElementById('uPassword').value, name: document.getElementById('uName').value, role: document.getElementById('uRole').value, studentId: document.getElementById('uStudentId').value };
+      const res = await fetch('/api/auth/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      if (res.ok) {
+        e.target.reset();
+        toggleForm('newUserForm');
+        await fetchCoreData();
+        renderUsers();
+      } else {
+        const data = await res.json();
+        alert('Gagal: ' + data.error);
+      }
+    };
+
+    document.getElementById('uRole').onchange = (e) => {
+      document.getElementById('uStudentIdGroup').classList.toggle('hidden', e.target.value === 'teacher');
+    };
+
+    function toggleForm(id) { document.getElementById(id).classList.toggle('hidden'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+    const user = JSON.parse(localStorage.getItem('hlms_user'));
+    if (!user || user.role !== 'teacher') {
+      window.location.href = '/index.html';
+    } else {
+      document.getElementById('userNameDisplay').innerText = user.name || user.username;
+      resetAssignmentBuilder();
+      fetchCoreData().then(renderDashboard);
+    }
+
+    function logout() {
+      localStorage.removeItem('hlms_user');
+      window.location.href = '/index.html';
+    }
+  </script>
+</body>
+</html>

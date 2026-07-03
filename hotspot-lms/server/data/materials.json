@@ -1,0 +1,33 @@
+[
+  {
+    "id": "1780396299943",
+    "title": "Untitled",
+    "description": "",
+    "createdAt": "2026-06-02T10:31:39.943Z"
+  },
+  {
+    "id": "1780398877063",
+    "title": "testdsaasd",
+    "description": "testwqasdad",
+    "fileName": "AkunTrust.pdf",
+    "filePath": "mat_4291c645-554f-474d-abed-8206ebd595f1.pdf",
+    "createdAt": "2026-06-02T11:14:37.063Z"
+  },
+  {
+    "id": "1780549230913",
+    "title": "Test over 10MB",
+    "description": "Test over 10MB",
+    "fileName": "2026-01-30 16-10-36.mp4",
+    "filePath": "mat_9eb6b300-88f5-49ce-b7e0-0854476c6830.mp4",
+    "createdAt": "2026-06-04T05:00:30.913Z"
+  },
+  {
+    "id": "1783058588621",
+    "courseId": "",
+    "title": "test",
+    "description": "test",
+    "fileName": "soal2_tower_hanoi.c",
+    "filePath": "mat_90e776d2-1a84-4c6d-a497-dac4f87fc6ee.c",
+    "createdAt": "2026-07-03T06:03:08.621Z"
+  }
+]

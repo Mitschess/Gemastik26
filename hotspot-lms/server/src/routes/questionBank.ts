@@ -1,0 +1,12 @@
+import { Router } from 'express';
+import { QuestionBankController } from '../controllers/questionBankController';
+
+const router = Router();
+const ctrl = new QuestionBankController();
+
+router.get('/', (req, res) => ctrl.list(req, res));
+router.post('/', (req, res) => ctrl.create(req, res));
+router.put('/:id', (req, res) => ctrl.update(req, res));
+router.delete('/:id', (req, res) => ctrl.remove(req, res));
+
+export default router;

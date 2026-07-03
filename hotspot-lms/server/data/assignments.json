@@ -1,0 +1,107 @@
+[
+  {
+    "id": "1780395669254",
+    "title": "Task 1",
+    "description": "Testing Pawn 1",
+    "questions": [
+      {
+        "id": "1780395681734",
+        "type": "essay",
+        "prompt": "Test",
+        "choices": []
+      },
+      {
+        "id": "1780396351350",
+        "type": "mcq",
+        "prompt": "Test",
+        "choices": [
+          "A. test",
+          "B. Test2",
+          "C. Test3"
+        ],
+        "answer": "A.Test"
+      }
+    ],
+    "createdAt": "2026-06-02T10:21:09.254Z"
+  },
+  {
+    "id": "1780550168102",
+    "title": "Test",
+    "description": "coba",
+    "dueDate": "",
+    "questions": [
+      {
+        "id": "1780550204958",
+        "type": "mcq",
+        "prompt": "Coba",
+        "choices": [
+          "A.Test",
+          "B.Test",
+          "C.Test"
+        ],
+        "answer": "A.Test, "
+      }
+    ],
+    "createdAt": "2026-06-04T05:16:08.102Z"
+  },
+  {
+    "id": "1781601824334",
+    "title": "Kuis",
+    "description": "Test ygy",
+    "dueDate": "2000-12-12T12:12",
+    "autoCheck": true,
+    "questions": [
+      {
+        "id": "1781601824334",
+        "type": "mcq",
+        "prompt": "Apa ini",
+        "choices": [
+          "Aku",
+          "Baca",
+          "Cuka"
+        ],
+        "answer": "Aku",
+        "points": 1
+      }
+    ],
+    "createdAt": "2026-06-16T09:23:44.334Z"
+  },
+  {
+    "id": "1783058334695",
+    "courseId": "",
+    "title": "qweewqewqwe",
+    "description": "67676767676",
+    "dueDate": "2012-12-12T12:12",
+    "autoCheck": true,
+    "activityType": "quiz",
+    "timeLimitMinutes": 0.5,
+    "randomizeQuestions": true,
+    "randomizeChoices": true,
+    "questions": [
+      {
+        "id": "1783058334695",
+        "type": "mcq",
+        "prompt": "tulis n",
+        "choices": [
+          "n",
+          "b",
+          "c"
+        ],
+        "answer": "n",
+        "points": 1
+      },
+      {
+        "id": "1783058334695",
+        "type": "mcq",
+        "prompt": "a",
+        "choices": [
+          "a",
+          "b"
+        ],
+        "answer": "a",
+        "points": 1
+      }
+    ],
+    "createdAt": "2026-07-03T05:58:54.695Z"
+  }
+]

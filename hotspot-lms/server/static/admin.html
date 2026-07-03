@@ -1,0 +1,113 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Teacher Admin - Manage Materials & Assignments</title>
+    <style>
+      body{font-family:Inter,Arial,Helvetica,sans-serif;max-width:1100px;margin:12px auto;padding:12px;background:#fbfcff}
+      h1{display:flex;justify-content:space-between;align-items:center}
+      .panel{background:white;padding:12px;border-radius:8px;box-shadow:0 1px 6px rgba(20,20,30,0.05);margin-top:12px}
+      label{display:block;margin:6px 0}
+      input,textarea,select{width:100%;padding:8px;border:1px solid #e6e9ef;border-radius:6px}
+      button{padding:8px 12px;border-radius:6px;border:none;background:#0b6efd;color:white;cursor:pointer}
+      .row{display:flex;gap:12px}
+      .col{flex:1}
+      .muted{color:#666;font-size:0.9rem}
+      table{width:100%;border-collapse:collapse;margin-top:8px}
+      th,td{padding:8px;border-bottom:1px solid #eef1f6;text-align:left}
+      .smallbtn{background:#e5e7eb;color:#111;padding:6px 8px;border-radius:6px}
+    </style>
+  </head>
+  <body>
+    <h1>Teacher Admin <a href="/teacher.html" class="muted">Back to Teacher View</a></h1>
+
+    <section class="panel" id="materialsPanel">
+      <h2>Materials</h2>
+      <form id="materialForm">
+        <label>Title<input id="matTitle" required /></label>
+        <label>Description<textarea id="matDesc" rows="3"></textarea></label>
+        <div style="display:flex;gap:8px"><button id="createMat">Create Material</button><div class="muted">Materials are plain items teachers can read</div></div>
+      </form>
+      <div id="materialsList"></div>
+    </section>
+
+    <section class="panel" id="assignPanel">
+      <h2>Assignments</h2>
+      <form id="assignForm">
+        <label>Title<input id="assignTitle" required /></label>
+        <label>Description<textarea id="assignDesc" rows="3"></textarea></label>
+        <label>Due date (ISO)<input id="assignDue" placeholder="2026-06-10T23:59:00Z" /></label>
+        <div style="display:flex;gap:8px"><button id="createAssign">Create Assignment</button><div class="muted">Create assignment then add questions</div></div>
+      </form>
+      <div id="assignList"></div>
+    </section>
+
+    <!-- question modal -->
+    <div id="qmodal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);align-items:center;justify-content:center">
+      <div style="background:white;padding:12px;border-radius:8px;max-width:720px;width:92%">
+        <button id="qclose" class="smallbtn" style="float:right">Close</button>
+        <h3 id="qmodalTitle">Add Question</h3>
+        <label>Type<select id="qtype"><option value="mcq">Multiple Choice</option><option value="essay">Essay</option></select></label>
+        <label>Prompt<textarea id="qprompt" rows="3"></textarea></label>
+        <label id="choicesLabel">Choices (comma separated)<input id="qchoices" placeholder="Choice A,Choice B,Choice C" /></label>
+        <label>Answer (for MCQ put exact choice text)<input id="qanswer" /></label>
+        <div style="display:flex;gap:8px;margin-top:8px"><button id="qadd">Add Question</button><div class="muted" id="qinfo"></div></div>
+      </div>
+    </div>
+
+    <script>
+      async function loadMaterials(){
+        const res = await fetch('/api/materials');
+        const list = await res.json();
+        const el = document.getElementById('materialsList');
+        if(!list.length){ el.innerHTML='<div class="muted">No materials</div>'; return }
+        el.innerHTML = '<table><thead><tr><th>Title</th><th>Description</th><th></th></tr></thead><tbody>' + list.map(m=>`<tr><td>${escape(m.title)}</td><td>${escape(m.description)}</td><td><button data-id="${m.id}" class="delMat smallbtn">Delete</button></td></tr>`).join('') + '</tbody></table>';
+        document.querySelectorAll('.delMat').forEach(b=>b.addEventListener('click', async e=>{ const id=b.dataset.id; if(confirm('Delete material?')){ await fetch('/api/materials/'+id,{method:'DELETE'}); loadMaterials(); }}));
+      }
+
+      async function loadAssignments(){
+        const res = await fetch('/api/assignments');
+        const list = await res.json();
+        const el = document.getElementById('assignList');
+        if(!list.length){ el.innerHTML='<div class="muted">No assignments</div>'; return }
+        el.innerHTML = list.map(a=>{
+          const qs = (a.questions||[]).map(q=>`<li>${escape(q.prompt)} <button data-a="${a.id}" data-q="${q.id}" class="delQ smallbtn">Remove</button></li>`).join('');
+          return `<div style="margin-bottom:12px;padding:8px;border:1px solid #eef1f6;border-radius:6px"><strong>${escape(a.title)}</strong><div class="muted">Due: ${escape(a.dueDate||'—')}</div><p>${escape(a.description)}</p><div><button data-id="${a.id}" class="addQ smallbtn">Add Question</button> <button data-id="${a.id}" class="delA smallbtn">Delete Assignment</button></div><ul>${qs}</ul></div>`
+        }).join('');
+        document.querySelectorAll('.addQ').forEach(b=>b.addEventListener('click', e=>{ openQModal(b.dataset.id); }));
+        document.querySelectorAll('.delA').forEach(b=>b.addEventListener('click', async ()=>{ if(confirm('Delete assignment?')){ await fetch('/api/assignments/'+b.dataset.id,{method:'DELETE'}); loadAssignments(); }}));
+        document.querySelectorAll('.delQ').forEach(b=>b.addEventListener('click', async ()=>{ const aid=b.dataset.a; const qid=b.dataset.q; if(confirm('Delete question?')){ await fetch(`/api/assignments/${aid}/questions/${qid}`,{method:'DELETE'}); loadAssignments(); }}));
+      }
+
+      function escape(s){ if(s==null) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+      document.getElementById('materialForm').addEventListener('submit', async e=>{ e.preventDefault(); const title=document.getElementById('matTitle').value.trim(); const desc=document.getElementById('matDesc').value.trim(); if(!title) return alert('Title required'); await fetch('/api/materials',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title,description:desc})}); document.getElementById('matTitle').value=''; document.getElementById('matDesc').value=''; loadMaterials(); });
+
+      document.getElementById('assignForm').addEventListener('submit', async e=>{ e.preventDefault(); const title=document.getElementById('assignTitle').value.trim(); const desc=document.getElementById('assignDesc').value.trim(); const due=document.getElementById('assignDue').value.trim(); if(!title) return alert('Title required'); await fetch('/api/assignments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title,description:desc,dueDate:due})}); document.getElementById('assignTitle').value=''; document.getElementById('assignDesc').value=''; document.getElementById('assignDue').value=''; loadAssignments(); });
+
+      // question modal
+      let currentAssignId = null;
+      function openQModal(assignId){ currentAssignId = assignId; document.getElementById('qmodal').style.display='flex'; document.getElementById('qmodalTitle').innerText = 'Add question to ' + assignId; }
+      document.getElementById('qclose').addEventListener('click', ()=>{ document.getElementById('qmodal').style.display='none'; });
+      document.getElementById('qtype').addEventListener('change', e=>{ document.getElementById('choicesLabel').style.display = e.target.value==='mcq' ? 'block' : 'none'; });
+      document.getElementById('qadd').addEventListener('click', async ()=>{
+        const type = document.getElementById('qtype').value;
+        const prompt = document.getElementById('qprompt').value.trim();
+        const choicesRaw = document.getElementById('qchoices').value.trim();
+        const answer = document.getElementById('qanswer').value.trim();
+        if(!prompt) return alert('Prompt required');
+        const payload = { type, prompt };
+        if(type==='mcq') payload.choices = choicesRaw.split(',').map(s=>s.trim()).filter(Boolean);
+        if(answer) payload.answer = answer;
+        await fetch(`/api/assignments/${currentAssignId}/questions`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+        document.getElementById('qmodal').style.display='none';
+        document.getElementById('qprompt').value=''; document.getElementById('qchoices').value=''; document.getElementById('qanswer').value='';
+        loadAssignments();
+      });
+
+      // initial load
+      loadMaterials(); loadAssignments();
+    </script>
+  </body>
+</html>

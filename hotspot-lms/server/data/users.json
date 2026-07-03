@@ -1,0 +1,17 @@
+[
+  {
+    "id": "admin",
+    "username": "admin",
+    "password": "admin",
+    "name": "Default Teacher",
+    "role": "teacher"
+  },
+  {
+    "id": "1780550056122",
+    "username": "murid1",
+    "password": "murid1",
+    "name": "murid1",
+    "role": "student",
+    "studentId": "1"
+  }
+]

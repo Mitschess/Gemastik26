@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Portal Siswa - Hotspot LMS</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="page">
+    <nav class="topbar">
+      <div class="topbar-inner">
+        <a href="/" class="brand"><span>Hotspot LMS</span></a>
+        <div class="nav-links">
+          <span class="text-sm text-secondary" id="userNameDisplay" style="margin-right: 12px;"></span>
+          <button class="btn btn-sm btn-secondary" onclick="logout()">Logout</button>
+        </div>
+      </div>
+    </nav>
+
+    <div class="tab-shell">
+      <div class="container-sm">
+        <div class="tabs tabs-scroll" id="studentTabBar">
+          <button class="tab active" data-tab="submit">Kirim Tugas</button>
+          <button class="tab" data-tab="materials">Materi Belajar</button>
+          <button class="tab" data-tab="history">Riwayat Saya</button>
+        </div>
+      </div>
+    </div>
+
+    <main class="container-sm mt-md">
+      <div class="card mb-md" style="padding:10px 16px; font-size:0.8rem; color:var(--text-muted)">
+         <span id="statusDot" class="status-dot"></span> <span id="connectionText">Memeriksa koneksi...</span>
+      </div>
+
+      <div class="card mb-md">
+        <label class="text-xs font-bold">Filter Kelas</label>
+        <select class="select input mt-xs" id="studentCourseFilter" onchange="renderStudentViews()"></select>
+      </div>
+
+      <section id="sec-submit" class="tab-section">
+        <div class="card">
+          <h2>Kirim Tugas / Quiz</h2>
+          <form id="submissionForm" class="flex flex-col gap-md mt-md">
+            <div class="flex gap-md responsive-row">
+              <div style="flex:1"><label class="text-xs">Nama Lengkap</label><input class="input" id="studentName" required /></div>
+              <div style="flex:1"><label class="text-xs">NIM / ID</label><input class="input" id="studentId" required /></div>
+            </div>
+            <div>
+              <label class="text-xs">Pilih Aktivitas</label>
+              <select class="select input" id="assignmentId" required></select>
+              <div id="assignmentInfo" class="card mt-sm hidden" style="background:var(--bg-primary); font-size:0.85rem"></div>
+            </div>
+            <div id="questionsContainer" class="hidden">
+              <h4 class="mb-sm">Pertanyaan:</h4>
+              <div id="questionsList" class="flex flex-col gap-md"></div>
+            </div>
+            <div><label class="text-xs">Catatan Tambahan</label><textarea class="textarea input" id="content" placeholder="Tulis jawaban atau catatan..."></textarea></div>
+            <div><label class="text-xs">Lampirkan File</label><input type="file" id="fileInput" class="input" /></div>
+            <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">Kirim Sekarang</button>
+          </form>
+        </div>
+      </section>
+
+      <section id="sec-materials" class="tab-section hidden">
+        <h2 class="mb-md">Materi Belajar</h2>
+        <div id="studentMatList" class="flex flex-col gap-md"></div>
+      </section>
+
+      <section id="sec-history" class="tab-section hidden">
+        <h2 class="mb-md">Riwayat Pengiriman</h2>
+        <div id="historyList" class="flex flex-col gap-md"></div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    let coursesData = [];
+    let assignmentsData = [];
+    let materialsData = [];
+    let submissionsData = [];
+    const studentTabs = document.querySelectorAll('#studentTabBar .tab');
+    studentTabs.forEach(tab => tab.addEventListener('click', () => switchTab(tab.dataset.tab)));
+
+    function escapeHtml(value) {
+      return String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;');
+    }
+
+    function courseTitle(id) {
+      return coursesData.find(c => c.id === id)?.title || 'Tanpa kelas';
+    }
+
+    function selectedCourseId() {
+      return document.getElementById('studentCourseFilter').value;
+    }
+
+    function shuffleCopy(items) {
+      const list = [...items];
+      for (let i = list.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [list[i], list[j]] = [list[j], list[i]];
+      }
+      return list;
+    }
+
+    function switchTab(name) {
+      studentTabs.forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+      document.querySelectorAll('.tab-section').forEach(s => s.classList.add('hidden'));
+      document.getElementById('sec-' + name).classList.remove('hidden');
+      renderStudentViews();
+    }
+
+    async function loadStudentData() {
+      const [courses, assignments, materials, submissions] = await Promise.all([
+        fetch('/api/courses').then(r => r.json()),
+        fetch('/api/assignments').then(r => r.json()),
+        fetch('/api/materials').then(r => r.json()),
+        fetch('/api/submissions/submissions').then(r => r.json())
+      ]);
+      coursesData = courses;
+      assignmentsData = assignments;
+      materialsData = materials;
+      submissionsData = submissions;
+      document.getElementById('studentCourseFilter').innerHTML = '<option value="">Semua kelas</option>' + coursesData.map(c => `<option value="${c.id}">${escapeHtml(c.title)}</option>`).join('');
+      renderStudentViews();
+    }
+
+    function filteredAssignments() {
+      const courseId = selectedCourseId();
+      return courseId ? assignmentsData.filter(a => a.courseId === courseId) : assignmentsData;
+    }
+
+    function filteredMaterials() {
+      const courseId = selectedCourseId();
+      return courseId ? materialsData.filter(m => m.courseId === courseId) : materialsData;
+    }
+
+    function renderStudentViews() {
+      renderAssignmentOptions();
+      renderMaterials();
+      renderHistory();
+    }
+
+    function renderAssignmentOptions() {
+      const select = document.getElementById('assignmentId');
+      const current = select.value;
+      const items = filteredAssignments();
+      select.innerHTML = '<option value="">Pilih aktivitas</option>' + items.map(a => `<option value="${a.id}">${escapeHtml(courseTitle(a.courseId))} - ${escapeHtml(a.title)}</option>`).join('');
+      if (items.some(a => a.id === current)) select.value = current;
+      if (!select.value) {
+        document.getElementById('assignmentInfo').classList.add('hidden');
+        document.getElementById('questionsContainer').classList.add('hidden');
+      }
+    }
+
+    function renderMaterials() {
+      const items = filteredMaterials();
+      document.getElementById('studentMatList').innerHTML = items.map(m => {
+        let previewHtml = '';
+        if (m.fileName) {
+          const ext = m.fileName.split('.').pop().toLowerCase();
+          const url = `/uploads/${m.filePath}`;
+          if (ext === 'mp4') {
+            previewHtml = `<div class="mt-md video-frame"><video controls><source src="${url}" type="video/mp4">Browser Anda tidak mendukung preview video.</video></div>`;
+          }
+        }
+        return `
+          <div class="card mb-md">
+            <div class="flex gap-sm items-center wrap-row"><h3>${escapeHtml(m.title)}</h3><span class="badge badge-info">${escapeHtml(courseTitle(m.courseId))}</span></div>
+            <p class="text-sm text-secondary mt-sm">${escapeHtml(m.description || '')}</p>
+            ${m.fileName ? `<div class="mt-md"><a href="/uploads/${m.filePath}" target="_blank" class="btn btn-sm btn-secondary">Download ${escapeHtml(m.fileName)}</a></div>` : ''}
+            ${previewHtml}
+          </div>
+        `;
+      }).join('') || '<p class="text-center text-muted">Belum ada materi.</p>';
+    }
+
+    function renderHistory() {
+      const user = JSON.parse(localStorage.getItem('hlms_user'));
+      const studentId = document.getElementById('studentId').value || user?.studentId || '';
+      const courseId = selectedCourseId();
+      const items = submissionsData.filter(s => (!studentId || s.studentId === studentId) && (!courseId || s.courseId === courseId));
+      document.getElementById('historyList').innerHTML = items.map(s => `
+        <div class="card">
+          <div class="flex justify-between items-start gap-md responsive-row">
+            <div>
+              <strong>${escapeHtml(assignmentsData.find(a => a.id === s.assignmentId)?.title || 'Tugas')}</strong>
+              <p class="text-xs text-muted mt-xs">${escapeHtml(courseTitle(s.courseId))} | ${new Date(s.submittedAt).toLocaleString('id-ID')}</p>
+              ${s.feedback ? `<p class="text-sm text-secondary mt-sm">${escapeHtml(s.feedback)}</p>` : ''}
+            </div>
+            <span class="badge ${s.grade === undefined || s.grade === null ? 'badge-warning' : 'badge-success'}">${s.grade === undefined || s.grade === null ? 'Menunggu nilai' : 'Nilai ' + s.grade}</span>
+          </div>
+        </div>
+      `).join('') || '<p class="text-center text-muted">Belum ada riwayat.</p>';
+    }
+
+    document.getElementById('assignmentId').onchange = (e) => {
+      const a = assignmentsData.find(x => x.id === e.target.value);
+      const info = document.getElementById('assignmentInfo');
+      const qContainer = document.getElementById('questionsContainer');
+      if (!a) { info.classList.add('hidden'); qContainer.classList.add('hidden'); return; }
+
+      info.classList.remove('hidden');
+      info.innerHTML = `
+        <div class="flex justify-between items-start gap-md responsive-row">
+          <div>
+            <div class="flex gap-sm items-center wrap-row">
+              <strong>${escapeHtml(a.title)}</strong>
+              <span class="badge badge-info">${escapeHtml(courseTitle(a.courseId))}</span>
+              <span class="badge ${a.activityType === 'quiz' ? 'badge-success' : 'badge-warning'}">${a.activityType === 'quiz' ? 'Quiz' : 'Assignment'}</span>
+            </div>
+            <p class="mt-xs">${escapeHtml(a.description || '')}</p>
+            ${a.timeLimitMinutes ? `<p class="text-xs text-muted mt-xs">Timer: ${a.timeLimitMinutes} menit</p>` : ''}
+          </div>
+          ${a.autoCheck ? '<span class="badge badge-success">Auto check aktif</span>' : '<span class="badge badge-warning">Dinilai guru</span>'}
+        </div>
+      `;
+
+      let questions = a.questions || [];
+      if (a.randomizeQuestions) questions = shuffleCopy(questions);
+      if (questions.length) {
+        qContainer.classList.remove('hidden');
+        document.getElementById('questionsList').innerHTML = questions.map((q, i) => {
+          const choices = q.randomizeChoices || a.randomizeChoices ? shuffleCopy(q.choices || []) : (q.choices || []);
+          return `
+            <div class="card" style="background:var(--bg-primary)">
+              <p class="mb-sm text-sm font-bold">${i + 1}. ${escapeHtml(q.prompt)}</p>
+              ${q.type === 'mcq' ? choices.map(c => `
+                <label class="flex items-center gap-sm text-sm mb-xs cursor-pointer">
+                  <input type="radio" name="q_${q.id}" value="${escapeHtml(c)}"> <span>${escapeHtml(c)}</span>
+                </label>
+              `).join('') : `<textarea class="textarea input" name="q_${q.id}" rows="2"></textarea>`}
+            </div>
+          `;
+        }).join('');
+      } else {
+        qContainer.classList.add('hidden');
+      }
+    };
+
+    document.getElementById('submissionForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const aid = document.getElementById('assignmentId').value;
+      const a = assignmentsData.find(x => x.id === aid);
+      const fd = new FormData();
+      fd.append('studentName', document.getElementById('studentName').value);
+      fd.append('studentId', document.getElementById('studentId').value);
+      fd.append('assignmentId', aid);
+      fd.append('content', document.getElementById('content').value);
+      if (document.getElementById('fileInput').files[0]) fd.append('file', document.getElementById('fileInput').files[0]);
+
+      const answers = [];
+      if (a?.questions) {
+        a.questions.forEach(q => {
+          let val = '';
+          if (q.type === 'mcq') {
+            const rad = e.target.querySelector(`input[name="q_${q.id}"]:checked`);
+            if (rad) val = rad.value;
+          } else {
+            const text = e.target.querySelector(`textarea[name="q_${q.id}"]`);
+            if (text) val = text.value;
+          }
+          answers.push({ questionId: q.id, answer: val });
+        });
+      }
+      fd.append('answers', JSON.stringify(answers));
+
+      const res = await fetch('/api/submissions/submit', { method: 'POST', body: fd });
+      if (!res.ok) return alert('Gagal mengirim. Periksa koneksi ke server guru.');
+      const data = await res.json();
+      if (data.submission?.autoChecked) {
+        alert(`Berhasil dikirim. Nilai otomatis: ${data.submission.grade}. ${data.submission.feedback || ''}`);
+      } else {
+        alert('Berhasil dikirim.');
+      }
+      e.target.reset();
+      personalizeUser();
+      document.getElementById('assignmentInfo').classList.add('hidden');
+      document.getElementById('questionsContainer').classList.add('hidden');
+      await loadStudentData();
+    };
+
+    async function checkConn() {
+       try {
+         await fetch('/api/network-info');
+         document.getElementById('statusDot').className = 'status-dot online';
+         document.getElementById('connectionText').innerText = 'Terhubung ke server guru';
+       } catch {
+         document.getElementById('statusDot').className = 'status-dot';
+         document.getElementById('connectionText').innerText = 'Tidak terhubung';
+       }
+    }
+
+    function personalizeUser() {
+      const user = JSON.parse(localStorage.getItem('hlms_user'));
+      if (!user) {
+        window.location.href = '/index.html';
+        return;
+      }
+      document.getElementById('userNameDisplay').innerText = user.name || user.username;
+      document.getElementById('studentName').value = user.name || '';
+      document.getElementById('studentId').value = user.studentId || '';
+      if (user.studentId) document.getElementById('studentId').readOnly = true;
+    }
+
+    function logout() {
+      localStorage.removeItem('hlms_user');
+      window.location.href = '/index.html';
+    }
+
+    personalizeUser();
+    loadStudentData();
+    checkConn();
+    setInterval(checkConn, 10000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+[
+  {
+    "id": "1780389893073",
+    "studentId": "100",
+    "assignmentId": "12",
+    "content": "Test",
+    "submittedAt": "2026-06-02T08:44:53.073Z"
+  },
+  {
+    "id": "1780390132891",
+    "studentId": "13",
+    "assignmentId": "12",
+    "content": "Coba",
+    "submittedAt": "2026-06-02T08:48:52.891Z"
+  },
+  {
+    "id": "0ac19038-9120-4db5-b782-0c77a084aaf8",
+    "studentId": "test",
+    "studentName": "test",
+    "assignmentId": "1780395669254",
+    "content": "",
+    "submittedAt": "2026-06-02T10:32:59.359Z"
+  },
+  {
+    "id": "6744621e-560f-48e8-92d4-373def13061a",
+    "studentId": "1233",
+    "studentName": "test",
+    "assignmentId": "1780395669254",
+    "content": "",
+    "submittedAt": "2026-06-02T10:33:24.333Z",
+    "grade": 100,
+    "feedback": "",
+    "gradedAt": "2026-06-04T05:16:56.372Z"
+  },
+  {
+    "id": "f12c4b93-ca23-431a-9d49-417abc06b00d",
+    "studentId": "1",
+    "studentName": "murid1",
+    "assignmentId": "1781601824334",
+    "content": "cobain",
+    "answers": [
+      {
+        "questionId": "1781601824334",
+        "answer": "Aku"
+      }
+    ],
+    "fileName": "Hitungan_Komnum.xlsx",
+    "filePath": "d77798cf-e297-42fc-a2ac-e152feaa96a3.xlsx",
+    "submittedAt": "2026-06-16T09:24:15.893Z",
+    "grade": 100,
+    "feedback": "Auto check: 1 dari 1 jawaban sesuai kunci.",
+    "gradedAt": "2026-06-16T09:24:15.894Z",
+    "autoChecked": true,
+    "correctCount": 1,
+    "totalAutoQuestions": 1
+  },
+  {
+    "id": "deccfa5d-22f6-4539-9df5-291e7674a4d8",
+    "studentId": "1",
+    "studentName": "murid1",
+    "assignmentId": "1783058334695",
+    "courseId": "",
+    "content": "k",
+    "answers": [
+      {
+        "questionId": "1783058334695",
+        "answer": "n"
+      },
+      {
+        "questionId": "1783058334695",
+        "answer": "n"
+      }
+    ],
+    "submittedAt": "2026-07-03T05:59:41.403Z",
+    "grade": 50,
+    "feedback": "Auto check: 1 dari 2 jawaban sesuai kunci.",
+    "gradedAt": "2026-07-03T05:59:41.403Z",
+    "autoChecked": true,
+    "correctCount": 1,
+    "totalAutoQuestions": 2,
+    "earnedPoints": 1,
+    "totalPoints": 2
+  }
+]
