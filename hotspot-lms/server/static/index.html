@@ -3,53 +3,73 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Login | Hotspot LMS</title>
+  <title>Masuk | EduLAN Classroom</title>
+  <script>!function(){var t=localStorage.getItem('edulan_theme'),d=matchMedia('(prefers-color-scheme:dark)').matches;document.documentElement.setAttribute('data-theme',t||(d?'dark':'light'))}();</script>
   <link rel="stylesheet" href="/styles.css" />
-  <style>
-    .login-container {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--bg-primary);
-    }
-    .login-card {
-      max-width: 400px;
-      width: 100%;
-    }
-  </style>
 </head>
 <body>
-  <div class="login-container">
-    <div class="card login-card animate-in">
-      <div class="text-center mb-lg">
-        <h1 style="font-size: 1.75rem;">Hotspot LMS</h1>
-        <p class="text-muted text-sm mt-xs">Silakan login untuk mengakses materi</p>
-      </div>
-
-      <form id="loginForm" class="flex flex-col gap-md">
-        <div class="form-group">
-          <label class="text-xs font-bold">Username</label>
-          <input class="input" id="username" type="text" placeholder="Masukkan username" required />
+  <div class="login-page">
+    <aside class="login-brand">
+      <div class="login-brand-content animate-in">
+        <div class="flex items-center gap-sm mb-lg">
+          <span class="brand-icon" style="width:48px;height:48px;border-radius:14px;background:#013880;color:#fff">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
+            </svg>
+          </span>
+          <span style="font-size:1.5rem;font-weight:800;color:#013880">EduLAN Classroom</span>
         </div>
-        <div class="form-group">
-          <label class="text-xs font-bold">Password</label>
-          <input class="input" id="password" type="password" placeholder="Masukkan password" required />
+        <h1>Portal belajar lokal ala myITS Classroom</h1>
+        <p>Tugas, quiz, materi, kalender, dan library — berjalan di jaringan Wi-Fi kelas tanpa internet publik.</p>
+        <div class="login-features">
+          <div class="login-feature">
+            <div class="login-feature-icon">📡</div>
+            <div><strong>Hotspot lokal</strong><br><span style="opacity:0.75;font-size:0.875rem">Siswa terhubung langsung ke laptop guru</span></div>
+          </div>
+          <div class="login-feature">
+            <div class="login-feature-icon">📝</div>
+            <div><strong>Tugas & quiz</strong><br><span style="opacity:0.75;font-size:0.875rem">Kumpulkan jawaban dan nilai otomatis</span></div>
+          </div>
+          <div class="login-feature">
+            <div class="login-feature-icon">📚</div>
+            <div><strong>Library digital</strong><br><span style="opacity:0.75;font-size:0.875rem">Modul, buku, dan materi dalam satu tempat</span></div>
+          </div>
         </div>
-        <button type="submit" class="btn btn-primary btn-lg w-full mt-md" id="loginBtn">Login</button>
-      </form>
-
-      <div id="errorMsg" class="text-danger text-sm text-center mt-md hidden"></div>
-
-      <div class="mt-lg pt-lg text-center" style="border-top: 1px solid var(--border-subtle)">
-        <p class="text-xs text-muted">Hubungi guru jika Anda lupa akun atau password</p>
       </div>
-    </div>
+    </aside>
+
+    <main class="login-panel">
+      <div class="login-card animate-in">
+        <h2>Selamat datang</h2>
+        <p class="subtitle">Masuk ke akun siswa atau guru</p>
+
+        <form id="loginForm" class="flex flex-col gap-md">
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input class="input" id="username" type="text" placeholder="Masukkan username" autocomplete="username" required />
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input class="input" id="password" type="password" placeholder="Masukkan password" autocomplete="current-password" required />
+          </div>
+          <button type="submit" class="btn btn-primary btn-lg w-full mt-sm" id="loginBtn">Masuk</button>
+        </form>
+
+        <div id="errorMsg" class="alert-error mt-md hidden"></div>
+
+        <div class="login-footer">
+          <p class="text-xs text-muted">Hubungi guru jika Anda lupa akun atau password</p>
+          <div class="mt-sm"><span id="themeToggleSlot"></span></div>
+        </div>
+      </div>
+    </main>
   </div>
 
+  <script src="/app.js"></script>
   <script>
-    // Redirect if already logged in
-    const user = JSON.parse(localStorage.getItem('hlms_user'));
+    initThemeToggle(document.getElementById('themeToggleSlot'));
+
+    const user = JSON.parse(localStorage.getItem('hlms_user') || 'null');
     if (user) {
       window.location.href = user.role === 'teacher' ? '/teacher.html' : '/student.html';
     }
@@ -59,7 +79,7 @@
       const loginBtn = document.getElementById('loginBtn');
       const errorMsg = document.getElementById('errorMsg');
 
-      loginBtn.innerText = 'Logging in...';
+      loginBtn.textContent = 'Memeriksa...';
       loginBtn.disabled = true;
       errorMsg.classList.add('hidden');
 
@@ -72,21 +92,20 @@
             password: document.getElementById('password').value
           })
         });
-
         const data = await res.json();
 
         if (res.ok) {
           localStorage.setItem('hlms_user', JSON.stringify(data.user));
           window.location.href = data.user.role === 'teacher' ? '/teacher.html' : '/student.html';
         } else {
-          errorMsg.innerText = data.error || 'Login gagal';
+          errorMsg.textContent = data.error || 'Login gagal. Periksa username dan password.';
           errorMsg.classList.remove('hidden');
         }
-      } catch (err) {
-        errorMsg.innerText = 'Kesalahan koneksi';
+      } catch {
+        errorMsg.textContent = 'Tidak dapat terhubung ke server. Pastikan Anda terhubung ke Wi-Fi kelas.';
         errorMsg.classList.remove('hidden');
       } finally {
-        loginBtn.innerText = 'Login';
+        loginBtn.textContent = 'Masuk';
         loginBtn.disabled = false;
       }
     };

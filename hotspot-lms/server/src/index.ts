@@ -9,6 +9,7 @@ import materialsRoutes from './routes/materials';
 import assignmentsRoutes from './routes/assignments';
 import coursesRoutes from './routes/courses';
 import questionBankRoutes from './routes/questionBank';
+import libraryRoutes from './routes/library';
 import { basicAuth } from './middleware/basicAuth';
 import { Request, Response, NextFunction } from 'express';
 
@@ -26,6 +27,7 @@ app.use('/api/materials', materialsRoutes); // Temporarily removed basicAuth to 
 app.use('/api/assignments', assignmentsRoutes);
 app.use('/api/courses', coursesRoutes);
 app.use('/api/question-bank', questionBankRoutes);
+app.use('/api/library', libraryRoutes);
 
 // Error handler
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {

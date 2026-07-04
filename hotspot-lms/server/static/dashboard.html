@@ -3,53 +3,61 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Hotspot LMS — Local Offline Learning</title>
+  <title>EduLAN Classroom — Ruang Belajar Lokal</title>
+  <script>!function(){var t=localStorage.getItem('edulan_theme'),d=matchMedia('(prefers-color-scheme:dark)').matches;document.documentElement.setAttribute('data-theme',t||(d?'dark':'light'))}();</script>
   <link rel="stylesheet" href="/styles.css" />
 </head>
-<body>
-  <div class="page">
-    <nav class="topbar">
-      <div class="topbar-inner">
-        <a href="/" class="brand">
-          <span>Hotspot LMS</span>
-        </a>
-        <div class="nav-links">
-          <a href="/student.html">Siswa</a>
-          <a href="/teacher.html">Guru</a>
-        </div>
+<body class="classroom-body">
+  <nav class="edw-navbar" aria-label="Navigasi utama">
+    <a href="/dashboard.html" class="edw-navbar-brand">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+      EduLAN Classroom
+    </a>
+    <div class="edw-sub-nav">
+      <div class="edw-primary-nav">
+        <ul class="edw-nav-list">
+          <li class="edw-nav-item"><a href="/dashboard.html" class="edw-nav-link active">Beranda</a></li>
+        </ul>
       </div>
-    </nav>
+      <div class="edw-user-nav">
+        <span id="themeToggleSlot"></span>
+        <a href="/index.html" class="btn btn-sm btn-primary" style="margin-left:8px">Masuk</a>
+      </div>
+    </div>
+  </nav>
 
-    <header class="hero">
-      <div class="container">
-        <div class="badge badge-info mb-md">Versi 1.0 — Offline Ready</div>
-        <h1>Belajar Kapan Saja,<br><span class="text-accent">Tanpa Internet.</span></h1>
-        <p class="subtitle text-secondary mt-md">
-          Solusi LMS lokal untuk daerah tanpa sinyal atau listrik. Cukup nyalakan hotspot, sambungkan perangkat, dan mulai pembelajaran interaktif.
-        </p>
-        <div class="flex gap-md mt-lg" style="justify-content: center;">
-          <a href="/student.html" class="btn btn-primary btn-lg">Mulai Belajar (Siswa)</a>
-          <a href="/teacher.html" class="btn btn-secondary btn-lg">Kelola Kelas (Guru)</a>
-        </div>
+  <header class="hero" style="margin-top:var(--navbar-height)">
+    <div class="container">
+      <div class="badge badge-info mb-md" style="background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.2)">Jaringan lokal sekolah</div>
+      <h1>Ruang belajar yang tetap jalan<br><span class="text-accent">meski internet mati.</span></h1>
+      <p class="subtitle">Guru menyalakan server di laptop, siswa terhubung lewat Wi-Fi kelas, lalu materi, tugas, quiz, library, dan nilai berjalan di jaringan lokal.</p>
+      <div class="hero-actions">
+        <a href="/index.html" class="btn btn-primary btn-lg">Masuk ke EduLAN</a>
+        <a href="/index.html" class="btn btn-secondary btn-lg">Pelajari lebih lanjut</a>
       </div>
-    </header>
+    </div>
+  </header>
 
-    <main class="container mt-lg">
-      <div class="stats-grid">
-        <div class="card card-glow">
-          <h3>Local Wi-Fi Only</h3>
-          <p class="text-sm text-secondary mt-sm">Tidak butuh paket data atau sinyal seluler. Semua data dikirim via jaringan hotspot guru.</p>
-        </div>
-        <div class="card card-glow">
-          <h3>Quiz & Assignment</h3>
-          <p class="text-sm text-secondary mt-sm">Mendukung soal pilihan ganda, essay, dan pengiriman file tugas dengan mudah.</p>
-        </div>
-        <div class="card card-glow">
-          <h3>Real-time Tracking</h3>
-          <p class="text-sm text-secondary mt-sm">Guru dapat melihat pengiriman siswa secara langsung dan memberikan nilai secara instan.</p>
-        </div>
+  <main class="container">
+    <div class="feature-grid">
+      <div class="feature-card animate-in">
+        <div class="feature-icon">📡</div>
+        <h3>Berjalan di Wi-Fi lokal</h3>
+        <p class="text-sm text-secondary mt-sm">Siswa cukup tersambung ke hotspot guru. Tidak perlu akun cloud atau paket data.</p>
       </div>
-    </main>
-  </div>
+      <div class="feature-card animate-in">
+        <div class="feature-icon">📝</div>
+        <h3>Tugas, quiz, dan library</h3>
+        <p class="text-sm text-secondary mt-sm">Guru menyiapkan aktivitas kelas, bank soal, koleksi bacaan, dan file pendukung.</p>
+      </div>
+      <div class="feature-card animate-in">
+        <div class="feature-icon">📊</div>
+        <h3>Rekap nilai di tempat</h3>
+        <p class="text-sm text-secondary mt-sm">Submission dan nilai tersimpan di laptop guru sehingga mudah dicek setelah kelas selesai.</p>
+      </div>
+    </div>
+  </main>
+  <script src="/app.js"></script>
+  <script>initThemeToggle(document.getElementById('themeToggleSlot'));</script>
 </body>
 </html>

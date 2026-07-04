@@ -23,6 +23,7 @@ const assignmentsDb = path_1.default.join(dataPath, 'assignments.json');
 const usersDb = path_1.default.join(dataPath, 'users.json');
 const coursesDb = path_1.default.join(dataPath, 'courses.json');
 const questionBankDb = path_1.default.join(dataPath, 'questionBank.json');
+const libraryDb = path_1.default.join(dataPath, 'library.json');
 const ensureDir = (dir) => {
     if (!fs_1.default.existsSync(dir)) {
         fs_1.default.mkdirSync(dir, { recursive: true });
@@ -55,6 +56,9 @@ const ensureDataPathExists = () => {
     }
     if (!fs_1.default.existsSync(questionBankDb)) {
         fs_1.default.writeFileSync(questionBankDb, JSON.stringify([]));
+    }
+    if (!fs_1.default.existsSync(libraryDb)) {
+        fs_1.default.writeFileSync(libraryDb, JSON.stringify([]));
     }
 };
 const saveSubmissionFile = (fileName, fileData) => {
@@ -283,6 +287,46 @@ exports.storageService = {
             const list = yield this.getAllQuestionBankItems();
             const filtered = list.filter((item) => item.id !== id);
             fs_1.default.writeFileSync(questionBankDb, JSON.stringify(filtered, null, 2));
+        });
+    },
+    // Library
+    getAllLibraryItems() {
+        return __awaiter(this, void 0, void 0, function* () {
+            ensureDataPathExists();
+            const raw = fs_1.default.readFileSync(libraryDb, 'utf-8');
+            try {
+                return JSON.parse(raw);
+            }
+            catch (_a) {
+                return [];
+            }
+        });
+    },
+    saveLibraryItem(item) {
+        return __awaiter(this, void 0, void 0, function* () {
+            ensureDataPathExists();
+            const list = yield this.getAllLibraryItems();
+            list.push(item);
+            fs_1.default.writeFileSync(libraryDb, JSON.stringify(list, null, 2));
+        });
+    },
+    updateLibraryItem(id, patch) {
+        return __awaiter(this, void 0, void 0, function* () {
+            ensureDataPathExists();
+            const list = yield this.getAllLibraryItems();
+            const idx = list.findIndex((item) => item.id === id);
+            if (idx === -1)
+                throw new Error('Not found');
+            list[idx] = Object.assign(Object.assign({}, list[idx]), patch);
+            fs_1.default.writeFileSync(libraryDb, JSON.stringify(list, null, 2));
+        });
+    },
+    deleteLibraryItem(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            ensureDataPathExists();
+            const list = yield this.getAllLibraryItems();
+            const filtered = list.filter((item) => item.id !== id);
+            fs_1.default.writeFileSync(libraryDb, JSON.stringify(filtered, null, 2));
         });
     },
     getUploadsPath() {

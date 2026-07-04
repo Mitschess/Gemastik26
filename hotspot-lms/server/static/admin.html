@@ -1,113 +1,255 @@
-<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Teacher Admin - Manage Materials & Assignments</title>
-    <style>
-      body{font-family:Inter,Arial,Helvetica,sans-serif;max-width:1100px;margin:12px auto;padding:12px;background:#fbfcff}
-      h1{display:flex;justify-content:space-between;align-items:center}
-      .panel{background:white;padding:12px;border-radius:8px;box-shadow:0 1px 6px rgba(20,20,30,0.05);margin-top:12px}
-      label{display:block;margin:6px 0}
-      input,textarea,select{width:100%;padding:8px;border:1px solid #e6e9ef;border-radius:6px}
-      button{padding:8px 12px;border-radius:6px;border:none;background:#0b6efd;color:white;cursor:pointer}
-      .row{display:flex;gap:12px}
-      .col{flex:1}
-      .muted{color:#666;font-size:0.9rem}
-      table{width:100%;border-collapse:collapse;margin-top:8px}
-      th,td{padding:8px;border-bottom:1px solid #eef1f6;text-align:left}
-      .smallbtn{background:#e5e7eb;color:#111;padding:6px 8px;border-radius:6px}
-    </style>
-  </head>
-  <body>
-    <h1>Teacher Admin <a href="/teacher.html" class="muted">Back to Teacher View</a></h1>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin Cepat | EduLAN</title>
+  <script>!function(){var t=localStorage.getItem('edulan_theme'),d=matchMedia('(prefers-color-scheme:dark)').matches;document.documentElement.setAttribute('data-theme',t||(d?'dark':'light'))}();</script>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <nav class="topbar">
+    <div class="topbar-inner">
+      <a href="/teacher.html" class="brand">
+        <span class="brand-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+        </span>
+        <span>EduLAN Admin</span>
+      </a>
+      <div class="nav-links">
+        <span id="themeToggleSlot"></span>
+        <a href="/teacher.html" class="btn btn-sm btn-secondary">← Panel Guru</a>
+      </div>
+    </div>
+  </nav>
 
-    <section class="panel" id="materialsPanel">
-      <h2>Materials</h2>
-      <form id="materialForm">
-        <label>Title<input id="matTitle" required /></label>
-        <label>Description<textarea id="matDesc" rows="3"></textarea></label>
-        <div style="display:flex;gap:8px"><button id="createMat">Create Material</button><div class="muted">Materials are plain items teachers can read</div></div>
-      </form>
-      <div id="materialsList"></div>
-    </section>
-
-    <section class="panel" id="assignPanel">
-      <h2>Assignments</h2>
-      <form id="assignForm">
-        <label>Title<input id="assignTitle" required /></label>
-        <label>Description<textarea id="assignDesc" rows="3"></textarea></label>
-        <label>Due date (ISO)<input id="assignDue" placeholder="2026-06-10T23:59:00Z" /></label>
-        <div style="display:flex;gap:8px"><button id="createAssign">Create Assignment</button><div class="muted">Create assignment then add questions</div></div>
-      </form>
-      <div id="assignList"></div>
-    </section>
-
-    <!-- question modal -->
-    <div id="qmodal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);align-items:center;justify-content:center">
-      <div style="background:white;padding:12px;border-radius:8px;max-width:720px;width:92%">
-        <button id="qclose" class="smallbtn" style="float:right">Close</button>
-        <h3 id="qmodalTitle">Add Question</h3>
-        <label>Type<select id="qtype"><option value="mcq">Multiple Choice</option><option value="essay">Essay</option></select></label>
-        <label>Prompt<textarea id="qprompt" rows="3"></textarea></label>
-        <label id="choicesLabel">Choices (comma separated)<input id="qchoices" placeholder="Choice A,Choice B,Choice C" /></label>
-        <label>Answer (for MCQ put exact choice text)<input id="qanswer" /></label>
-        <div style="display:flex;gap:8px;margin-top:8px"><button id="qadd">Add Question</button><div class="muted" id="qinfo"></div></div>
+  <main class="container" style="padding:28px 24px 48px">
+    <div class="page-header">
+      <div>
+        <h1>Admin Cepat</h1>
+        <p class="text-secondary">Kelola materi dan tugas secara langsung — alternatif sederhana dari panel guru.</p>
       </div>
     </div>
 
-    <script>
-      async function loadMaterials(){
-        const res = await fetch('/api/materials');
-        const list = await res.json();
+    <div class="dashboard-grid">
+      <section class="card">
+        <div class="section-header">
+          <div>
+            <h2>Materi</h2>
+            <p class="text-sm text-secondary">Tambah materi pembelajaran tanpa upload file.</p>
+          </div>
+        </div>
+        <form id="materialForm" class="flex flex-col gap-md">
+          <div class="form-group">
+            <label for="matTitle">Judul</label>
+            <input class="input" id="matTitle" placeholder="Contoh: Slide Bab 1" required />
+          </div>
+          <div class="form-group">
+            <label for="matDesc">Deskripsi</label>
+            <textarea class="textarea" id="matDesc" rows="3" placeholder="Ringkasan materi..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">Buat Materi</button>
+        </form>
+        <div id="materialsList" class="mt-lg"></div>
+      </section>
+
+      <section class="card">
+        <div class="section-header">
+          <div>
+            <h2>Tugas</h2>
+            <p class="text-sm text-secondary">Buat tugas lalu tambahkan pertanyaan.</p>
+          </div>
+        </div>
+        <form id="assignForm" class="flex flex-col gap-md">
+          <div class="form-group">
+            <label for="assignTitle">Judul</label>
+            <input class="input" id="assignTitle" placeholder="Contoh: Tugas 1" required />
+          </div>
+          <div class="form-group">
+            <label for="assignDesc">Deskripsi</label>
+            <textarea class="textarea" id="assignDesc" rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="assignDue">Batas Waktu (ISO)</label>
+            <input class="input" id="assignDue" placeholder="2026-06-10T23:59:00Z" />
+          </div>
+          <button type="submit" class="btn btn-primary">Buat Tugas</button>
+        </form>
+        <div id="assignList" class="mt-lg assignment-list"></div>
+      </section>
+    </div>
+  </main>
+
+  <div class="modal-overlay" id="qmodal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="qmodalTitle">Tambah Pertanyaan</h3>
+        <button class="icon-btn" id="qclose">✕</button>
+      </div>
+      <div class="flex flex-col gap-md mt-md">
+        <div class="form-group">
+          <label for="qtype">Tipe</label>
+          <select class="select" id="qtype">
+            <option value="mcq">Pilihan Ganda</option>
+            <option value="essay">Essay</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="qprompt">Pertanyaan</label>
+          <textarea class="textarea" id="qprompt" rows="3"></textarea>
+        </div>
+        <div class="form-group" id="choicesLabel">
+          <label for="qchoices">Pilihan (pisahkan koma)</label>
+          <input class="input" id="qchoices" placeholder="A, B, C, D" />
+        </div>
+        <div class="form-group">
+          <label for="qanswer">Kunci Jawaban</label>
+          <input class="input" id="qanswer" placeholder="Teks pilihan yang benar (MCQ)" />
+        </div>
+        <button class="btn btn-primary w-full" id="qadd">Tambah Pertanyaan</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+  <script>
+    initThemeToggle(document.getElementById('themeToggleSlot'));
+
+    async function loadMaterials() {
+      setContainerLoading('materialsList', true, 2);
+      try {
+        const list = await fetch('/api/materials').then(r => r.json());
         const el = document.getElementById('materialsList');
-        if(!list.length){ el.innerHTML='<div class="muted">No materials</div>'; return }
-        el.innerHTML = '<table><thead><tr><th>Title</th><th>Description</th><th></th></tr></thead><tbody>' + list.map(m=>`<tr><td>${escape(m.title)}</td><td>${escape(m.description)}</td><td><button data-id="${m.id}" class="delMat smallbtn">Delete</button></td></tr>`).join('') + '</tbody></table>';
-        document.querySelectorAll('.delMat').forEach(b=>b.addEventListener('click', async e=>{ const id=b.dataset.id; if(confirm('Delete material?')){ await fetch('/api/materials/'+id,{method:'DELETE'}); loadMaterials(); }}));
+        if (!list.length) {
+          el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📖</div><p>Belum ada materi.</p></div>';
+          return;
+        }
+        el.innerHTML = list.map(m => `
+          <div class="mini-row mb-sm" style="cursor:default">
+            <span><strong>${escapeHtml(m.title)}</strong><small>${escapeHtml(m.description || '')}</small></span>
+            <button class="btn btn-sm btn-danger delMat" data-id="${m.id}">Hapus</button>
+          </div>
+        `).join('');
+        document.querySelectorAll('.delMat').forEach(b => b.addEventListener('click', async () => {
+          if (!confirm('Hapus materi ini?')) return;
+          await fetch('/api/materials/' + b.dataset.id, { method: 'DELETE' });
+          showToast('Materi dihapus', 'success');
+          loadMaterials();
+        }));
+      } catch {
+        showToast('Gagal memuat materi', 'error');
       }
+    }
 
-      async function loadAssignments(){
-        const res = await fetch('/api/assignments');
-        const list = await res.json();
+    async function loadAssignments() {
+      setContainerLoading('assignList', true, 2);
+      try {
+        const list = await fetch('/api/assignments').then(r => r.json());
         const el = document.getElementById('assignList');
-        if(!list.length){ el.innerHTML='<div class="muted">No assignments</div>'; return }
-        el.innerHTML = list.map(a=>{
-          const qs = (a.questions||[]).map(q=>`<li>${escape(q.prompt)} <button data-a="${a.id}" data-q="${q.id}" class="delQ smallbtn">Remove</button></li>`).join('');
-          return `<div style="margin-bottom:12px;padding:8px;border:1px solid #eef1f6;border-radius:6px"><strong>${escape(a.title)}</strong><div class="muted">Due: ${escape(a.dueDate||'—')}</div><p>${escape(a.description)}</p><div><button data-id="${a.id}" class="addQ smallbtn">Add Question</button> <button data-id="${a.id}" class="delA smallbtn">Delete Assignment</button></div><ul>${qs}</ul></div>`
+        if (!list.length) {
+          el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📝</div><p>Belum ada tugas.</p></div>';
+          return;
+        }
+        el.innerHTML = list.map(a => {
+          const qs = (a.questions || []).map(q => `
+            <div class="question-summary-row">
+              <span>${escapeHtml(q.prompt)}</span>
+              <button class="btn btn-sm btn-danger delQ" data-a="${a.id}" data-q="${q.id}">Hapus</button>
+            </div>
+          `).join('');
+          return `
+            <div class="card card-flat" style="background:var(--bg-primary);padding:16px">
+              <div class="flex justify-between items-start gap-md responsive-row">
+                <div>
+                  <strong>${escapeHtml(a.title)}</strong>
+                  <p class="text-xs text-muted mt-xs">Deadline: ${escapeHtml(a.dueDate || '—')}</p>
+                  <p class="text-sm text-secondary mt-xs">${escapeHtml(a.description || '')}</p>
+                </div>
+                <div class="flex gap-sm wrap-row">
+                  <button class="btn btn-sm btn-secondary addQ" data-id="${a.id}">+ Soal</button>
+                  <button class="btn btn-sm btn-danger delA" data-id="${a.id}">Hapus</button>
+                </div>
+              </div>
+              ${qs ? `<div class="question-summary mt-sm">${qs}</div>` : '<p class="text-xs text-muted mt-sm">Belum ada pertanyaan.</p>'}
+            </div>
+          `;
         }).join('');
-        document.querySelectorAll('.addQ').forEach(b=>b.addEventListener('click', e=>{ openQModal(b.dataset.id); }));
-        document.querySelectorAll('.delA').forEach(b=>b.addEventListener('click', async ()=>{ if(confirm('Delete assignment?')){ await fetch('/api/assignments/'+b.dataset.id,{method:'DELETE'}); loadAssignments(); }}));
-        document.querySelectorAll('.delQ').forEach(b=>b.addEventListener('click', async ()=>{ const aid=b.dataset.a; const qid=b.dataset.q; if(confirm('Delete question?')){ await fetch(`/api/assignments/${aid}/questions/${qid}`,{method:'DELETE'}); loadAssignments(); }}));
+
+        document.querySelectorAll('.addQ').forEach(b => b.addEventListener('click', () => openQModal(b.dataset.id)));
+        document.querySelectorAll('.delA').forEach(b => b.addEventListener('click', async () => {
+          if (!confirm('Hapus tugas ini?')) return;
+          await fetch('/api/assignments/' + b.dataset.id, { method: 'DELETE' });
+          showToast('Tugas dihapus', 'success');
+          loadAssignments();
+        }));
+        document.querySelectorAll('.delQ').forEach(b => b.addEventListener('click', async () => {
+          if (!confirm('Hapus pertanyaan ini?')) return;
+          await fetch(`/api/assignments/${b.dataset.a}/questions/${b.dataset.q}`, { method: 'DELETE' });
+          showToast('Pertanyaan dihapus', 'success');
+          loadAssignments();
+        }));
+      } catch {
+        showToast('Gagal memuat tugas', 'error');
       }
+    }
 
-      function escape(s){ if(s==null) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    document.getElementById('materialForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const title = document.getElementById('matTitle').value.trim();
+      const desc = document.getElementById('matDesc').value.trim();
+      if (!title) return showToast('Judul wajib diisi', 'error');
+      await fetch('/api/materials', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, description: desc }) });
+      e.target.reset();
+      showToast('Materi berhasil dibuat', 'success');
+      loadMaterials();
+    });
 
-      document.getElementById('materialForm').addEventListener('submit', async e=>{ e.preventDefault(); const title=document.getElementById('matTitle').value.trim(); const desc=document.getElementById('matDesc').value.trim(); if(!title) return alert('Title required'); await fetch('/api/materials',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title,description:desc})}); document.getElementById('matTitle').value=''; document.getElementById('matDesc').value=''; loadMaterials(); });
+    document.getElementById('assignForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const title = document.getElementById('assignTitle').value.trim();
+      const desc = document.getElementById('assignDesc').value.trim();
+      const due = document.getElementById('assignDue').value.trim();
+      if (!title) return showToast('Judul wajib diisi', 'error');
+      await fetch('/api/assignments', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, description: desc, dueDate: due }) });
+      e.target.reset();
+      showToast('Tugas berhasil dibuat', 'success');
+      loadAssignments();
+    });
 
-      document.getElementById('assignForm').addEventListener('submit', async e=>{ e.preventDefault(); const title=document.getElementById('assignTitle').value.trim(); const desc=document.getElementById('assignDesc').value.trim(); const due=document.getElementById('assignDue').value.trim(); if(!title) return alert('Title required'); await fetch('/api/assignments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title,description:desc,dueDate:due})}); document.getElementById('assignTitle').value=''; document.getElementById('assignDesc').value=''; document.getElementById('assignDue').value=''; loadAssignments(); });
+    let currentAssignId = null;
+    function openQModal(assignId) {
+      currentAssignId = assignId;
+      document.getElementById('qmodalTitle').textContent = 'Tambah pertanyaan';
+      document.getElementById('qmodal').classList.add('show');
+    }
 
-      // question modal
-      let currentAssignId = null;
-      function openQModal(assignId){ currentAssignId = assignId; document.getElementById('qmodal').style.display='flex'; document.getElementById('qmodalTitle').innerText = 'Add question to ' + assignId; }
-      document.getElementById('qclose').addEventListener('click', ()=>{ document.getElementById('qmodal').style.display='none'; });
-      document.getElementById('qtype').addEventListener('change', e=>{ document.getElementById('choicesLabel').style.display = e.target.value==='mcq' ? 'block' : 'none'; });
-      document.getElementById('qadd').addEventListener('click', async ()=>{
-        const type = document.getElementById('qtype').value;
-        const prompt = document.getElementById('qprompt').value.trim();
-        const choicesRaw = document.getElementById('qchoices').value.trim();
-        const answer = document.getElementById('qanswer').value.trim();
-        if(!prompt) return alert('Prompt required');
-        const payload = { type, prompt };
-        if(type==='mcq') payload.choices = choicesRaw.split(',').map(s=>s.trim()).filter(Boolean);
-        if(answer) payload.answer = answer;
-        await fetch(`/api/assignments/${currentAssignId}/questions`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-        document.getElementById('qmodal').style.display='none';
-        document.getElementById('qprompt').value=''; document.getElementById('qchoices').value=''; document.getElementById('qanswer').value='';
-        loadAssignments();
-      });
+    document.getElementById('qclose').onclick = () => document.getElementById('qmodal').classList.remove('show');
+    document.getElementById('qtype').onchange = e => {
+      document.getElementById('choicesLabel').classList.toggle('hidden', e.target.value !== 'mcq');
+    };
 
-      // initial load
-      loadMaterials(); loadAssignments();
-    </script>
-  </body>
+    document.getElementById('qadd').onclick = async () => {
+      const type = document.getElementById('qtype').value;
+      const prompt = document.getElementById('qprompt').value.trim();
+      const choicesRaw = document.getElementById('qchoices').value.trim();
+      const answer = document.getElementById('qanswer').value.trim();
+      if (!prompt) return showToast('Pertanyaan wajib diisi', 'error');
+      const payload = { type, prompt };
+      if (type === 'mcq') payload.choices = choicesRaw.split(',').map(s => s.trim()).filter(Boolean);
+      if (answer) payload.answer = answer;
+      await fetch(`/api/assignments/${currentAssignId}/questions`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      document.getElementById('qmodal').classList.remove('show');
+      document.getElementById('qprompt').value = '';
+      document.getElementById('qchoices').value = '';
+      document.getElementById('qanswer').value = '';
+      showToast('Pertanyaan ditambahkan', 'success');
+      loadAssignments();
+    };
+
+    loadMaterials();
+    loadAssignments();
+  </script>
+</body>
 </html>

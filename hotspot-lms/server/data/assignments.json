@@ -103,5 +103,33 @@
       }
     ],
     "createdAt": "2026-07-03T05:58:54.695Z"
+  },
+  {
+    "id": "1783128986259",
+    "courseId": "1783061654349",
+    "title": "fssdas",
+    "description": "dfasfdsf",
+    "dueDate": "",
+    "autoCheck": true,
+    "activityType": "assignment",
+    "timeLimitMinutes": 23,
+    "attemptLimit": 12,
+    "randomizeQuestions": false,
+    "randomizeChoices": false,
+    "questions": [
+      {
+        "id": "1783128986258",
+        "type": "mcq",
+        "prompt": "sad",
+        "choices": [
+          "a",
+          "ads",
+          "ads"
+        ],
+        "answer": "ads",
+        "points": 1
+      }
+    ],
+    "createdAt": "2026-07-04T01:36:26.259Z"
   }
 ]
