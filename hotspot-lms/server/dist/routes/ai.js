@@ -1,0 +1,14 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const aiController_1 = require("../controllers/aiController");
+const requireTeacher_1 = require("../middleware/requireTeacher");
+const router = (0, express_1.Router)();
+const ctrl = new aiController_1.AiController();
+router.use(requireTeacher_1.requireTeacher);
+router.get('/status', (req, res, next) => ctrl.status(req, res).catch(next));
+router.post('/analyze-question', (req, res, next) => ctrl.analyzeQuestion(req, res).catch(next));
+router.post('/summarize', (req, res, next) => ctrl.summarize(req, res).catch(next));
+router.post('/clean-ocr', (req, res, next) => ctrl.cleanOcr(req, res).catch(next));
+router.post('/chat', (req, res, next) => ctrl.chat(req, res).catch(next));
+exports.default = router;

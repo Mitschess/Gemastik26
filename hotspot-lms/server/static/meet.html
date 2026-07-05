@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EduLAN Meet — Video Lokal</title>
+  <script>!function(){var t=localStorage.getItem('edulan_theme'),d=matchMedia('(prefers-color-scheme:dark)').matches;document.documentElement.setAttribute('data-theme',t||(d?'dark':'light'))}();</script>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body class="meet-body">
+  <!-- Lobby -->
+  <div id="meetLobby" class="meet-lobby">
+    <div class="meet-lobby-card card">
+      <div class="badge badge-info mb-md">100% Offline — Jaringan Lokal</div>
+      <h1>EduLAN Meet</h1>
+      <p class="text-secondary mt-sm">Video meeting tanpa internet. Guru buat ruang, siswa join pakai kode.</p>
+
+      <div id="meetSecureWarning" class="meet-secure-warning hidden"></div>
+
+      <div id="meetPreview" class="meet-preview mt-lg">
+        <video id="previewVideo" autoplay playsinline muted></video>
+        <div class="meet-preview-label">Preview kamera</div>
+      </div>
+
+      <div class="mt-lg flex flex-col gap-md">
+        <div id="meetCreateSection" class="hidden">
+          <button class="btn btn-primary w-full" onclick="createMeeting()">Buat Meeting Baru</button>
+        </div>
+        <div class="flex gap-md responsive-row">
+          <div style="flex:1">
+            <label class="text-xs">Kode Ruang</label>
+            <input class="input" id="roomCodeInput" placeholder="Contoh: KELAS8A" maxlength="12" />
+          </div>
+          <div style="flex:1">
+            <label class="text-xs">&nbsp;</label>
+            <button class="btn btn-primary w-full" onclick="joinMeeting()">Gabung Meeting</button>
+          </div>
+        </div>
+      </div>
+
+      <p class="text-xs text-muted mt-md" id="meetLobbyHint"></p>
+      <a href="#" id="meetBackLink" class="text-xs mt-md" style="display:inline-block;color:var(--brand-light)">← Kembali</a>
+    </div>
+  </div>
+
+  <!-- Meeting room -->
+  <div id="meetRoom" class="meet-room hidden">
+    <header class="meet-header">
+      <div>
+        <strong>EduLAN Meet</strong>
+        <span class="meet-room-code" id="meetRoomCode"></span>
+      </div>
+      <div class="meet-header-right">
+        <span class="meet-participant-count" id="meetParticipantCount">1 peserta</span>
+        <button class="btn btn-sm btn-ghost" onclick="copyMeetLink()">Salin Link</button>
+      </div>
+    </header>
+
+    <div class="meet-main">
+      <div class="meet-video-area">
+        <div id="meetVideoGrid" class="meet-video-grid"></div>
+      </div>
+
+      <aside id="meetChatPanel" class="meet-chat-panel">
+        <div class="meet-chat-header">
+          <strong>Chat</strong>
+          <button class="meet-chat-toggle btn btn-icon btn-ghost" onclick="toggleMeetChat()">✕</button>
+        </div>
+        <div id="meetChatMessages" class="meet-chat-messages"></div>
+        <div class="meet-chat-input-area">
+          <input class="input" id="meetChatInput" placeholder="Ketik pesan..." />
+          <button class="btn btn-primary btn-sm" onclick="sendMeetChat()">Kirim</button>
+        </div>
+      </aside>
+    </div>
+
+    <footer class="meet-controls">
+      <button class="meet-ctrl-btn" id="btnToggleMic" onclick="toggleMic()" title="Mic on/off">
+        <span id="micIcon">🎤</span>
+        <span class="meet-ctrl-label">Mic</span>
+      </button>
+      <button class="meet-ctrl-btn" id="btnToggleCam" onclick="toggleCam()" title="Kamera on/off">
+        <span id="camIcon">📷</span>
+        <span class="meet-ctrl-label">Kamera</span>
+      </button>
+      <button class="meet-ctrl-btn" onclick="toggleMeetChat()" title="Chat">
+        <span>💬</span>
+        <span class="meet-ctrl-label">Chat</span>
+      </button>
+      <button class="meet-ctrl-btn meet-ctrl-leave" onclick="leaveMeeting()" title="Keluar">
+        <span>📞</span>
+        <span class="meet-ctrl-label">Keluar</span>
+      </button>
+    </footer>
+  </div>
+
+  <script src="/app.js"></script>
+  <script src="/meet.js"></script>
+</body>
+</html>

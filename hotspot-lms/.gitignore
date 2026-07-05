@@ -1,0 +1,6 @@
+# Model Ollama (~1 GB) — jangan commit
+ai/ollama-data/*
+!ai/ollama-data/.gitkeep
+
+# HTTPS certs (auto-generated)
+server/certs/*.pem

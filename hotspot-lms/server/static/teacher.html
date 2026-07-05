@@ -58,6 +58,8 @@
         <button class="sidebar-item" data-tab="materials"><span class="nav-icon">📖</span> Materi</button>
         <button class="sidebar-item" data-tab="library"><span class="nav-icon">📚</span> Library</button>
         <button class="sidebar-item" data-tab="submissions"><span class="nav-icon">📥</span> Pengumpulan</button>
+        <button class="sidebar-item" data-tab="ai"><span class="nav-icon">🤖</span> AI Assistant</button>
+        <a href="/meet.html" class="sidebar-item"><span class="nav-icon">📹</span> EduLAN Meet</a>
         <button class="sidebar-item" data-tab="users"><span class="nav-icon">👥</span> Akun</button>
       </nav>
       <div class="sidebar-footer">
@@ -324,6 +326,40 @@
         </div>
       </section>
 
+      <section id="sec-ai" class="tab-section hidden">
+        <div class="card">
+          <div class="badge badge-info mb-md">AI Lokal — Qwen 1.5B</div>
+          <p class="text-secondary" id="aiStatus">Memeriksa koneksi AI...</p>
+        </div>
+
+        <div class="card mt-lg">
+          <h3>Analisis Soal</h3>
+          <label class="text-xs">Pilih dari Bank Soal</label>
+          <select class="select input" id="aiQuestionPicker">
+            <option value="">Belum ada bank soal</option>
+          </select>
+          <label class="text-xs mt-md">Atau tulis manual</label>
+          <textarea class="input" id="aiQuestionText" rows="3" placeholder="Tulis soal di sini..."></textarea>
+          <button class="btn btn-primary mt-md" onclick="runAnalyzeQuestion()">Analisis</button>
+          <pre id="aiAnalyzeResult" class="ai-result mt-md hidden"></pre>
+        </div>
+
+        <div class="card mt-lg">
+          <h3>Rangkum Dokumen</h3>
+          <textarea class="input" id="aiSummarizeText" rows="6" placeholder="Paste teks dokumen di sini..."></textarea>
+          <button class="btn btn-primary mt-md" onclick="runSummarize()">Rangkum</button>
+          <pre id="aiSummarizeResult" class="ai-result mt-md hidden"></pre>
+        </div>
+
+        <div class="card mt-lg">
+          <h3>Extract Tulisan Murid</h3>
+          <p class="text-xs text-muted">Paste teks hasil OCR / tulisan murid, AI akan merapikannya.</p>
+          <textarea class="input" id="aiOcrText" rows="4" placeholder="Teks mentah dari tulisan murid..."></textarea>
+          <button class="btn btn-primary mt-md" onclick="runCleanOcr()">Rapikan Teks</button>
+          <pre id="aiOcrResult" class="ai-result mt-md hidden"></pre>
+        </div>
+      </section>
+
       <section id="sec-users" class="tab-section hidden">
         <div class="flex justify-between items-center mb-md">
            <h2>Manajemen Akun</h2>
@@ -353,6 +389,36 @@
       </section>
       </main>
     </div>
+
+  </div>
+
+  <div id="aiChatWidget" class="ai-chat-widget">
+    <button type="button" id="aiChatToggle" class="ai-chat-fab" aria-label="Buka AI Assistant" onclick="toggleAiChat()">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/>
+      </svg>
+    </button>
+    <div id="aiChatPanel" class="ai-chat-panel hidden">
+      <div class="ai-chat-header">
+        <div class="ai-chat-header-info">
+          <strong>EduLAN AI</strong>
+          <span id="aiChatStatus" class="ai-chat-status">Memeriksa...</span>
+        </div>
+        <button type="button" class="ai-chat-close" onclick="toggleAiChat(false)" aria-label="Tutup">×</button>
+      </div>
+      <div id="aiChatMessages" class="ai-chat-messages"></div>
+      <div class="ai-chat-quick">
+        <button type="button" class="ai-chat-chip" onclick="sendChatSuggestion('Bantu analisis soal pilihan ganda')">Analisis soal</button>
+        <button type="button" class="ai-chat-chip" onclick="sendChatSuggestion('Cara merangkum materi pelajaran untuk murid')">Tips rangkum</button>
+        <button type="button" class="ai-chat-chip" onclick="sendChatSuggestion('Cara mengevaluasi jawaban essay murid')">Evaluasi essay</button>
+      </div>
+      <div class="ai-chat-input-area">
+        <textarea id="aiChatInput" class="ai-chat-input" rows="2" placeholder="Tanya AI..."></textarea>
+        <button type="button" id="aiChatSend" class="ai-chat-send" onclick="sendChatMessage()" aria-label="Kirim">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+        </button>
+      </div>
+    </div>
   </div>
 
   <div class="modal-overlay" id="gradeModal">
@@ -381,9 +447,16 @@
     let questionDrafts = [];
 
     const TAB_TITLES = {
-      dashboard: 'Dashboard', courses: 'Kelas', assignments: 'Soal & Tugas',
-      questionbank: 'Bank Soal', gradebook: 'Gradebook', materials: 'Materi',
-      library: 'Library', submissions: 'Pengumpulan', users: 'Manajemen Akun'
+      dashboard: 'Dashboard',
+      courses: 'Kelas',
+      assignments: 'Soal & Tugas',
+      questionbank: 'Bank Soal',
+      gradebook: 'Gradebook',
+      materials: 'Materi',
+      library: 'Library',
+      submissions: 'Pengumpulan',
+      ai: 'AI Assistant',
+      users: 'Manajemen Akun'
     };
 
     const tabs = document.querySelectorAll('.sidebar-item[data-tab]');
@@ -473,8 +546,167 @@
       if (name === 'materials') renderMaterials();
       if (name === 'library') renderLibrary();
       if (name === 'submissions') renderSubmissions();
+      if (name === 'ai') renderAI();
       if (name === 'users') renderUsers();
     }
+
+    function aiHeaders() {
+      const user = JSON.parse(localStorage.getItem('hlms_user') || '{}');
+      return { 'Content-Type': 'application/json', 'X-User-Role': user.role || '' };
+    }
+
+    function aiFetch(url, body) {
+      return fetch(url, { method: 'POST', headers: aiHeaders(), body: JSON.stringify(body) }).then(r => r.json());
+    }
+
+    function showAiResult(id, text, loading = false) {
+      const el = document.getElementById(id);
+      el.classList.remove('hidden');
+      el.textContent = loading ? 'Memproses... (bisa 10–30 detik)' : text;
+    }
+
+    async function renderAI() {
+      try {
+        const status = await fetch('/api/ai/status', { headers: aiHeaders() }).then(r => r.json());
+        document.getElementById('aiStatus').textContent = status.online
+          ? `✅ AI online — model: ${status.model}`
+          : '❌ AI offline — jalankan docker compose / Ollama';
+      } catch {
+        document.getElementById('aiStatus').textContent = '❌ Tidak bisa menghubungi server AI';
+      }
+      const picker = document.getElementById('aiQuestionPicker');
+      picker.innerHTML = allBankItems.length
+        ? allBankItems.map(item => `<option value="${item.id}">${escapeHtml((item.category || 'Umum') + ' - ' + item.prompt.slice(0, 60))}</option>`).join('')
+        : '<option value="">Belum ada bank soal</option>';
+    }
+
+    async function runAnalyzeQuestion() {
+      const picker = document.getElementById('aiQuestionPicker');
+      const item = allBankItems.find(i => i.id === picker.value);
+      const prompt = document.getElementById('aiQuestionText').value.trim() || item?.prompt || '';
+      if (!prompt) return showToast('Isi soal terlebih dahulu', 'warning');
+      showAiResult('aiAnalyzeResult', '', true);
+      try {
+        const data = await aiFetch('/api/ai/analyze-question', {
+          prompt,
+          options: item?.choices?.join(', '),
+          answer: item?.answer
+        });
+        showAiResult('aiAnalyzeResult', data.result || data.error || 'Gagal memproses');
+      } catch {
+        showAiResult('aiAnalyzeResult', 'Gagal menghubungi AI');
+      }
+    }
+
+    async function runSummarize() {
+      const text = document.getElementById('aiSummarizeText').value.trim();
+      if (!text) return showToast('Paste teks dokumen terlebih dahulu', 'warning');
+      showAiResult('aiSummarizeResult', '', true);
+      try {
+        const data = await aiFetch('/api/ai/summarize', { text });
+        showAiResult('aiSummarizeResult', data.result || data.error || 'Gagal memproses');
+      } catch {
+        showAiResult('aiSummarizeResult', 'Gagal menghubungi AI');
+      }
+    }
+
+    async function runCleanOcr() {
+      const text = document.getElementById('aiOcrText').value.trim();
+      if (!text) return showToast('Paste teks tulisan murid terlebih dahulu', 'warning');
+      showAiResult('aiOcrResult', '', true);
+      try {
+        const data = await aiFetch('/api/ai/clean-ocr', { text });
+        showAiResult('aiOcrResult', data.result || data.error || 'Gagal memproses');
+      } catch {
+        showAiResult('aiOcrResult', 'Gagal menghubungi AI');
+      }
+    }
+
+    let aiChatOpen = false;
+    let aiChatHistory = [];
+    let aiChatBusy = false;
+
+    function toggleAiChat(force) {
+      aiChatOpen = force !== undefined ? force : !aiChatOpen;
+      document.getElementById('aiChatPanel').classList.toggle('hidden', !aiChatOpen);
+      document.getElementById('aiChatToggle').classList.toggle('active', aiChatOpen);
+      if (aiChatOpen) {
+        initAiChat();
+        document.getElementById('aiChatInput').focus();
+      }
+    }
+
+    function appendChatMessage(role, content, loading = false) {
+      const box = document.getElementById('aiChatMessages');
+      const msg = document.createElement('div');
+      msg.className = `ai-chat-msg ai-chat-msg-${role}${loading ? ' ai-chat-msg-loading' : ''}`;
+      msg.textContent = content;
+      if (loading) msg.dataset.loading = '1';
+      box.appendChild(msg);
+      box.scrollTop = box.scrollHeight;
+      return msg;
+    }
+
+    function removeLoadingChatMessage() {
+      document.querySelector('#aiChatMessages [data-loading="1"]')?.remove();
+    }
+
+    async function initAiChat() {
+      const box = document.getElementById('aiChatMessages');
+      if (box.childElementCount) return;
+      appendChatMessage('bot', 'Halo! Saya EduLAN AI. Tanyakan apa saja seputar analisis soal, rangkum materi, atau evaluasi jawaban murid.');
+      try {
+        const status = await fetch('/api/ai/status', { headers: aiHeaders() }).then(r => r.json());
+        document.getElementById('aiChatStatus').textContent = status.online ? 'Online' : 'Offline';
+        document.getElementById('aiChatStatus').classList.toggle('offline', !status.online);
+      } catch {
+        document.getElementById('aiChatStatus').textContent = 'Offline';
+        document.getElementById('aiChatStatus').classList.add('offline');
+      }
+    }
+
+    async function sendChatMessage() {
+      const input = document.getElementById('aiChatInput');
+      const message = input.value.trim();
+      if (!message || aiChatBusy) return;
+      input.value = '';
+      await sendChatSuggestion(message);
+    }
+
+    async function sendChatSuggestion(text) {
+      if (aiChatBusy) return;
+      if (!aiChatOpen) toggleAiChat(true);
+      aiChatBusy = true;
+      document.getElementById('aiChatSend').disabled = true;
+      appendChatMessage('user', text);
+      appendChatMessage('bot', 'Sedang mengetik...', true);
+      try {
+        const data = await aiFetch('/api/ai/chat', { message: text, history: aiChatHistory });
+        removeLoadingChatMessage();
+        const reply = data.result || data.error || 'Maaf, gagal memproses.';
+        appendChatMessage('bot', reply);
+        aiChatHistory.push({ role: 'user', content: text });
+        aiChatHistory.push({ role: 'assistant', content: reply });
+        if (aiChatHistory.length > 10) aiChatHistory = aiChatHistory.slice(-10);
+      } catch {
+        removeLoadingChatMessage();
+        appendChatMessage('bot', 'Gagal menghubungi AI. Pastikan Ollama sedang berjalan.');
+      } finally {
+        aiChatBusy = false;
+        document.getElementById('aiChatSend').disabled = false;
+      }
+    }
+
+    (function initChatInput() {
+      const chatInput = document.getElementById('aiChatInput');
+      if (!chatInput) return;
+      chatInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          sendChatMessage();
+        }
+      });
+    })();
 
     function renderDashboard() {
       const graded = allSubmissions.filter(item => item.grade !== undefined && item.grade !== null).length;
