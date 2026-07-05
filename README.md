@@ -8,7 +8,7 @@ git clone https://github.com/<username>/<repo>.git
 cd hotspot-lms
 docker compose up -d --build
 
-# 3. Download model AI (sekali, ~1 GB)
+# 3. Download model AI (sekali, ~5 GB)
 docker compose exec ollama ollama pull qwen2.5:1.5b
 
 # 4. Buka browser
