@@ -10,6 +10,7 @@ const assignmentsDb = path.join(dataPath, 'assignments.json');
 const usersDb = path.join(dataPath, 'users.json');
 const coursesDb = path.join(dataPath, 'courses.json');
 const questionBankDb = path.join(dataPath, 'questionBank.json');
+const libraryDb = path.join(dataPath, 'library.json');
 
 const ensureDir = (dir: string) => {
     if (!fs.existsSync(dir)) {
@@ -44,6 +45,9 @@ const ensureDataPathExists = () => {
     }
     if (!fs.existsSync(questionBankDb)) {
         fs.writeFileSync(questionBankDb, JSON.stringify([]));
+    }
+    if (!fs.existsSync(libraryDb)) {
+        fs.writeFileSync(libraryDb, JSON.stringify([]));
     }
 };
 
@@ -209,6 +213,33 @@ export const storageService = {
         const list = await this.getAllQuestionBankItems();
         const filtered = list.filter((item: any) => item.id !== id);
         fs.writeFileSync(questionBankDb, JSON.stringify(filtered, null, 2));
+    },
+
+    // Library
+    async getAllLibraryItems(): Promise<any[]> {
+        ensureDataPathExists();
+        const raw = fs.readFileSync(libraryDb, 'utf-8');
+        try { return JSON.parse(raw); } catch { return []; }
+    },
+    async saveLibraryItem(item: any): Promise<void> {
+        ensureDataPathExists();
+        const list = await this.getAllLibraryItems();
+        list.push(item);
+        fs.writeFileSync(libraryDb, JSON.stringify(list, null, 2));
+    },
+    async updateLibraryItem(id: string, patch: Partial<any>): Promise<void> {
+        ensureDataPathExists();
+        const list = await this.getAllLibraryItems();
+        const idx = list.findIndex((item: any) => item.id === id);
+        if (idx === -1) throw new Error('Not found');
+        list[idx] = { ...list[idx], ...patch };
+        fs.writeFileSync(libraryDb, JSON.stringify(list, null, 2));
+    },
+    async deleteLibraryItem(id: string): Promise<void> {
+        ensureDataPathExists();
+        const list = await this.getAllLibraryItems();
+        const filtered = list.filter((item: any) => item.id !== id);
+        fs.writeFileSync(libraryDb, JSON.stringify(filtered, null, 2));
     },
 
     getUploadsPath(): string {

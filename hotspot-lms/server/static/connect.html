@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EduLAN — Connect</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    body { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
+    .connect-card { max-width:440px; width:100%; }
+    .connect-url {
+      display:block; word-break:break-all; padding:12px; margin:8px 0;
+      background:var(--bg-secondary); border-radius:10px; font-weight:600;
+      color:var(--brand-light); font-size:0.9375rem;
+    }
+    .connect-label { font-size:0.75rem; color:var(--text-muted); margin-top:12px; }
+    .connect-warn { background:#fef3c7; border:1px solid #f59e0b; border-radius:10px; padding:12px; font-size:0.8125rem; color:#92400e; margin-bottom:12px; }
+  </style>
+</head>
+<body>
+  <div class="card connect-card">
+    <div class="badge badge-info mb-md">EduLAN Hotspot</div>
+    <h1>Connect ke EduLAN</h1>
+
+    <div id="hotspotWarn" class="connect-warn hidden">
+      ⚠️ <strong>Hotspot belum nyala.</strong> Nyalakan Mobile Hotspot di laptop guru dulu, lalu refresh halaman ini.
+    </div>
+
+    <p class="connect-label"><strong>LMS (login, tugas, materi):</strong></p>
+    <a id="lmsUrl" class="connect-url" href="#">Memuat...</a>
+    <button class="btn btn-secondary btn-sm w-full mb-md" onclick="copy('lms')">Salin Link LMS</button>
+
+    <p class="connect-label"><strong>Meet (video + kamera HP):</strong></p>
+    <a id="meetUrl" class="connect-url" href="#">Memuat...</a>
+    <button class="btn btn-primary btn-sm w-full" onclick="copy('meet')">Salin Link Meet</button>
+
+    <p class="text-xs text-muted mt-md">Meet wajib <strong>https://</strong> + abaikan peringatan sertifikat di HP.</p>
+    <a href="/index.html" class="text-xs mt-md" style="display:inline-block">→ Login EduLAN</a>
+  </div>
+  <script src="/app.js"></script>
+  <script>
+    let urls = { lms: '', meet: '' };
+    fetch('/api/network-info').then(r => r.json()).then(info => {
+      urls.lms = info.studentUrl?.replace('/student.html','') || `http://${info.primaryIp}:5000`;
+      urls.meet = info.meetUrl?.replace('/meet.html','') || `https://${info.primaryIp}:5443`;
+      document.getElementById('lmsUrl').href = urls.lms;
+      document.getElementById('lmsUrl').textContent = urls.lms;
+      document.getElementById('meetUrl').href = urls.meet + '/meet.html';
+      document.getElementById('meetUrl').textContent = urls.meet + '/meet.html';
+      if (!info.hotspotOn) document.getElementById('hotspotWarn').classList.remove('hidden');
+    });
+    function copy(type) {
+      const text = type === 'meet' ? document.getElementById('meetUrl').textContent : urls.lms;
+      navigator.clipboard.writeText(text).then(() => showToast('Link disalin!', 'success'));
+    }
+  </script>
+</body>
+</html>

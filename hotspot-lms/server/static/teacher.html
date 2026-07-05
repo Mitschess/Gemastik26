@@ -3,47 +3,97 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Teacher Portal - Hotspot LMS</title>
+  <title>Panel Guru - EduLAN</title>
+  <script>!function(){var t=localStorage.getItem('edulan_theme'),d=matchMedia('(prefers-color-scheme:dark)').matches;document.documentElement.setAttribute('data-theme',t||(d?'dark':'light'))}();</script>
   <link rel="stylesheet" href="/styles.css" />
 </head>
-<body>
-  <div class="page">
-    <nav class="topbar">
-      <div class="topbar-inner">
-        <a href="/" class="brand"><span>Hotspot LMS</span></a>
-        <div class="nav-links">
-          <span class="text-sm text-secondary" id="userNameDisplay" style="margin-right: 12px;"></span>
-          <button class="btn btn-sm btn-secondary" onclick="logout()">Logout</button>
-        </div>
+<body class="classroom-body">
+  <nav class="edw-navbar" aria-label="Navigasi guru">
+    <a href="/teacher.html" class="edw-navbar-brand">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+      EduLAN Classroom
+    </a>
+    <div class="edw-sub-nav">
+      <button class="edw-nav-toggler" onclick="toggleSidebar()" aria-label="Menu">☰</button>
+      <div class="edw-primary-nav">
+        <ul class="edw-nav-list">
+          <li class="edw-nav-item"><a href="/dashboard.html" class="edw-nav-link">Beranda</a></li>
+          <li class="edw-nav-item"><a href="#" class="edw-nav-link active" onclick="return false">Panel Guru</a></li>
+        </ul>
       </div>
-    </nav>
-
-    <div class="tab-shell">
-      <div class="container">
-        <div class="tabs tabs-scroll" id="tabBar">
-          <button class="tab active" data-tab="dashboard">Dashboard</button>
-          <button class="tab" data-tab="courses">Kelas</button>
-          <button class="tab" data-tab="assignments">Soal & Tugas</button>
-          <button class="tab" data-tab="questionbank">Bank Soal</button>
-          <button class="tab" data-tab="gradebook">Gradebook</button>
-          <button class="tab" data-tab="materials">Materi</button>
-          <button class="tab" data-tab="submissions">Submission</button>
-          <button class="tab" data-tab="users">Users</button>
+      <div class="edw-user-nav">
+        <span id="themeToggleSlot"></span>
+        <div class="edw-nav-divider"></div>
+        <div class="edw-user-menu">
+          <button class="edw-user-btn" onclick="toggleUserMenu()" aria-label="Menu pengguna">
+            <span class="edw-user-initials" id="navUserInitials">G</span>
+          </button>
+          <div class="edw-dropdown" id="userDropdown">
+            <div class="edw-dropdown-item" style="cursor:default;font-weight:600" id="navUserName">Guru</div>
+            <button class="edw-dropdown-item" onclick="logout()">🚪 Keluar</button>
+          </div>
         </div>
       </div>
     </div>
+  </nav>
+  <div class="app-shell">
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <aside class="sidebar" id="sidebar">
+      <a href="/dashboard.html" class="sidebar-brand">
+        <span class="brand-icon" style="width:32px;height:32px;border-radius:8px">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+        </span>
+        EduLAN
+      </a>
+      <nav class="sidebar-nav" id="tabBar">
+        <button class="sidebar-item active" data-tab="dashboard"><span class="nav-icon">📊</span> Dashboard</button>
+        <button class="sidebar-item" data-tab="courses"><span class="nav-icon">🏫</span> Kelas</button>
+        <button class="sidebar-item" data-tab="assignments"><span class="nav-icon">📝</span> Soal & Tugas</button>
+        <button class="sidebar-item" data-tab="questionbank"><span class="nav-icon">🗂️</span> Bank Soal</button>
+        <button class="sidebar-item" data-tab="gradebook"><span class="nav-icon">📈</span> Gradebook</button>
+        <button class="sidebar-item" data-tab="materials"><span class="nav-icon">📖</span> Materi</button>
+        <button class="sidebar-item" data-tab="library"><span class="nav-icon">📚</span> Library</button>
+        <button class="sidebar-item" data-tab="submissions"><span class="nav-icon">📥</span> Pengumpulan</button>
+        <button class="sidebar-item" data-tab="ai"><span class="nav-icon">🤖</span> AI Assistant</button>
+        <a href="/meet.html" class="sidebar-item"><span class="nav-icon">📹</span> EduLAN Meet</a>
+        <button class="sidebar-item" data-tab="users"><span class="nav-icon">👥</span> Akun</button>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="sidebar-item" onclick="logout()"><span class="nav-icon">🚪</span> Keluar</button>
+      </div>
+    </aside>
 
-    <main class="container mt-lg">
+    <div class="app-main">
+      <header class="app-topbar">
+        <div class="app-topbar-left">
+          <button class="btn btn-icon btn-ghost" id="menuToggle" onclick="toggleSidebar()" style="display:none">☰</button>
+          <h1 class="page-title" id="pageTitle">Dashboard</h1>
+        </div>
+        <div class="app-topbar-right">
+          <span id="themeToggleSlot"></span>
+          <div class="user-chip">
+            <div class="user-avatar" id="userAvatar">G</div>
+            <div>
+              <div class="user-chip-name" id="userNameDisplay">Guru</div>
+              <div class="user-chip-role">Guru</div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="app-content">
       <section id="sec-dashboard" class="tab-section">
         <div class="dashboard-hero">
           <div>
-            <div class="badge badge-info mb-md">Moodle-like v1</div>
-            <h1>Dashboard LMS</h1>
-            <p class="text-secondary mt-sm">Kelola kelas, aktivitas, bank soal, materi, dan nilai dari satu panel offline.</p>
+            <div class="badge badge-info mb-md">Panel guru</div>
+            <h1>Ringkasan kelas hari ini</h1>
+            <p class="text-secondary mt-sm">Kelola kelas, aktivitas, bank soal, materi, library, dan nilai dari jaringan lokal sekolah.</p>
           </div>
           <div class="dashboard-actions">
             <button class="btn btn-primary" onclick="switchTab('courses'); showCourseForm()">Buat Kelas</button>
-            <button class="btn btn-secondary" onclick="switchTab('assignments'); showAssignmentBuilder()">Buat Quiz</button>
+            <button class="btn btn-secondary" onclick="switchTab('assignments'); showAssignmentBuilder()">Buat quiz</button>
           </div>
         </div>
 
@@ -51,8 +101,9 @@
           <div class="stat-card stat-accent"><div class="stat-value" id="statCourses">0</div><div class="stat-label">Kelas</div></div>
           <div class="stat-card"><div class="stat-value" id="statAssign">0</div><div class="stat-label">Aktivitas</div></div>
           <div class="stat-card"><div class="stat-value" id="statBank">0</div><div class="stat-label">Bank Soal</div></div>
-          <div class="stat-card"><div class="stat-value" id="statSubs">0</div><div class="stat-label">Submission</div></div>
+          <div class="stat-card"><div class="stat-value" id="statSubs">0</div><div class="stat-label">Pengumpulan</div></div>
           <div class="stat-card"><div class="stat-value" id="statMats">0</div><div class="stat-label">Materi</div></div>
+          <div class="stat-card"><div class="stat-value" id="statLibrary">0</div><div class="stat-label">Library</div></div>
           <div class="stat-card"><div class="stat-value" id="statPending">0</div><div class="stat-label">Perlu Dinilai</div></div>
         </div>
 
@@ -78,7 +129,7 @@
         <div class="section-header">
           <div>
             <h2>Kelas / Course</h2>
-            <p class="text-sm text-secondary">Course menjadi wadah materi, tugas, quiz, dan gradebook.</p>
+            <p class="text-sm text-secondary">Kelas menjadi wadah materi, tugas, quiz, library, dan nilai.</p>
           </div>
           <button class="btn btn-primary btn-sm" onclick="showCourseForm()">Tambah Kelas</button>
         </div>
@@ -106,7 +157,7 @@
         <div class="section-header">
           <div>
             <h2>Soal & Tugas</h2>
-            <p class="text-sm text-secondary">Buat assignment atau quiz, hubungkan ke kelas, dan aktifkan auto check.</p>
+            <p class="text-sm text-secondary">Buat tugas atau quiz, hubungkan ke kelas, dan aktifkan koreksi otomatis bila diperlukan.</p>
           </div>
           <button class="btn btn-primary btn-sm" onclick="showAssignmentBuilder()">Buat Aktivitas</button>
         </div>
@@ -115,7 +166,7 @@
           <div class="builder-top">
             <div>
               <h3>Builder Aktivitas</h3>
-              <p class="text-sm text-secondary">Mendukung course, bank soal, quiz setting, dan kunci jawaban.</p>
+              <p class="text-sm text-secondary">Atur kelas, kunci jawaban, timer, dan soal dari bank soal.</p>
             </div>
             <button class="btn btn-sm btn-secondary" onclick="hideAssignmentBuilder()">Tutup</button>
           </div>
@@ -192,7 +243,7 @@
       <section id="sec-gradebook" class="tab-section hidden">
         <div class="section-header">
           <div>
-            <h2>Gradebook</h2>
+            <h2>Daftar Nilai</h2>
             <p class="text-sm text-secondary">Rekap nilai per siswa dan per aktivitas.</p>
           </div>
           <button class="btn btn-secondary btn-sm" onclick="exportGradebookCsv()">Export CSV</button>
@@ -220,9 +271,50 @@
         <div id="matList" class="flex flex-col gap-md"></div>
       </section>
 
+      <section id="sec-library" class="tab-section hidden">
+        <div class="section-header">
+          <div>
+            <h2>Library</h2>
+            <p class="text-sm text-secondary">Repositori buku, modul, artikel, link, dan file pendukung pembelajaran.</p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="toggleForm('newLibraryForm')">Tambah Koleksi</button>
+        </div>
+        <div id="newLibraryForm" class="card mb-md hidden">
+          <h3>Tambah Koleksi Library</h3>
+          <form id="libraryUploadForm" class="flex flex-col gap-md mt-md">
+            <div class="form-grid">
+              <select class="select input" id="libCourse"></select>
+              <select class="select input" id="libType">
+                <option value="book">Buku</option>
+                <option value="module">Modul</option>
+                <option value="article">Artikel</option>
+                <option value="video">Video</option>
+                <option value="link">Link</option>
+                <option value="file">File</option>
+              </select>
+            </div>
+            <div class="form-grid">
+              <input class="input" id="libTitle" placeholder="Judul koleksi" required />
+              <input class="input" id="libCategory" placeholder="Kategori, contoh: Jaringan" />
+            </div>
+            <div class="form-grid">
+              <input class="input" id="libAuthor" placeholder="Penulis / pembuat" />
+              <input class="input" id="libPublisher" placeholder="Penerbit / sumber" />
+            </div>
+            <textarea class="textarea input" id="libDesc" placeholder="Deskripsi singkat..."></textarea>
+            <input class="input" id="libTags" placeholder="Tag, pisahkan dengan koma. Contoh: kelas 10, jaringan, dasar" />
+            <input class="input" id="libUrl" placeholder="URL eksternal jika berupa link/video" />
+            <input type="file" class="input" id="libFile" />
+            <button type="submit" class="btn btn-primary">Simpan ke Library</button>
+          </form>
+        </div>
+        <div class="filter-row mb-md"><select class="select input" id="libraryCourseFilter" onchange="renderLibrary()"></select></div>
+        <div id="libraryList" class="library-grid"></div>
+      </section>
+
       <section id="sec-submissions" class="tab-section hidden">
         <div class="flex justify-between items-center mb-md">
-           <h2>Submission</h2>
+           <h2>Pengumpulan</h2>
            <button class="btn btn-secondary btn-sm" id="refreshBtn">Refresh</button>
         </div>
         <div class="filter-row mb-md"><select class="select input" id="submissionCourseFilter" onchange="renderSubmissions()"></select></div>
@@ -232,9 +324,43 @@
         </div>
       </section>
 
+      <section id="sec-ai" class="tab-section hidden">
+        <div class="card">
+          <div class="badge badge-info mb-md">AI Lokal — Qwen 1.5B</div>
+          <p class="text-secondary" id="aiStatus">Memeriksa koneksi AI...</p>
+        </div>
+
+        <div class="card mt-lg">
+          <h3>Analisis Soal</h3>
+          <label class="text-xs">Pilih dari Bank Soal</label>
+          <select class="select input" id="aiQuestionPicker">
+            <option value="">Belum ada bank soal</option>
+          </select>
+          <label class="text-xs mt-md">Atau tulis manual</label>
+          <textarea class="input" id="aiQuestionText" rows="3" placeholder="Tulis soal di sini..."></textarea>
+          <button class="btn btn-primary mt-md" onclick="runAnalyzeQuestion()">Analisis</button>
+          <pre id="aiAnalyzeResult" class="ai-result mt-md hidden"></pre>
+        </div>
+
+        <div class="card mt-lg">
+          <h3>Rangkum Dokumen</h3>
+          <textarea class="input" id="aiSummarizeText" rows="6" placeholder="Paste teks dokumen di sini..."></textarea>
+          <button class="btn btn-primary mt-md" onclick="runSummarize()">Rangkum</button>
+          <pre id="aiSummarizeResult" class="ai-result mt-md hidden"></pre>
+        </div>
+
+        <div class="card mt-lg">
+          <h3>Extract Tulisan Murid</h3>
+          <p class="text-xs text-muted">Paste teks hasil OCR / tulisan murid, AI akan merapikannya.</p>
+          <textarea class="input" id="aiOcrText" rows="4" placeholder="Teks mentah dari tulisan murid..."></textarea>
+          <button class="btn btn-primary mt-md" onclick="runCleanOcr()">Rapikan Teks</button>
+          <pre id="aiOcrResult" class="ai-result mt-md hidden"></pre>
+        </div>
+      </section>
+
       <section id="sec-users" class="tab-section hidden">
         <div class="flex justify-between items-center mb-md">
-           <h2>User Management</h2>
+           <h2>Manajemen Akun</h2>
            <button class="btn btn-primary btn-sm" onclick="toggleForm('newUserForm')">Tambah User</button>
         </div>
 
@@ -259,7 +385,37 @@
            <div id="userList"></div>
         </div>
       </section>
-    </main>
+      </main>
+    </div>
+  </div>
+
+  <div id="aiChatWidget" class="ai-chat-widget">
+    <button type="button" id="aiChatToggle" class="ai-chat-fab" aria-label="Buka AI Assistant" onclick="toggleAiChat()">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/>
+      </svg>
+    </button>
+    <div id="aiChatPanel" class="ai-chat-panel hidden">
+      <div class="ai-chat-header">
+        <div class="ai-chat-header-info">
+          <strong>EduLAN AI</strong>
+          <span id="aiChatStatus" class="ai-chat-status">Memeriksa...</span>
+        </div>
+        <button type="button" class="ai-chat-close" onclick="toggleAiChat(false)" aria-label="Tutup">×</button>
+      </div>
+      <div id="aiChatMessages" class="ai-chat-messages"></div>
+      <div class="ai-chat-quick">
+        <button type="button" class="ai-chat-chip" onclick="sendChatSuggestion('Bantu analisis soal pilihan ganda')">Analisis soal</button>
+        <button type="button" class="ai-chat-chip" onclick="sendChatSuggestion('Cara merangkum materi pelajaran untuk murid')">Tips rangkum</button>
+        <button type="button" class="ai-chat-chip" onclick="sendChatSuggestion('Cara mengevaluasi jawaban essay murid')">Evaluasi essay</button>
+      </div>
+      <div class="ai-chat-input-area">
+        <textarea id="aiChatInput" class="ai-chat-input" rows="2" placeholder="Tanya AI..."></textarea>
+        <button type="button" id="aiChatSend" class="ai-chat-send" onclick="sendChatMessage()" aria-label="Kirim">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+        </button>
+      </div>
+    </div>
   </div>
 
   <div class="modal-overlay" id="gradeModal">
@@ -276,26 +432,32 @@
     </div>
   </div>
 
+  <script src="/app.js"></script>
   <script>
     let allCourses = [];
     let allAssignments = [];
     let allSubmissions = [];
     let allMaterials = [];
+    let allLibraryItems = [];
     let allUsers = [];
     let allBankItems = [];
     let questionDrafts = [];
 
-    const tabs = document.querySelectorAll('.tab');
-    tabs.forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
+    const TAB_TITLES = {
+      dashboard: 'Dashboard', courses: 'Kelas', assignments: 'Soal & Tugas',
+      questionbank: 'Bank Soal', gradebook: 'Gradebook', materials: 'Materi',
+      library: 'Library', submissions: 'Pengumpulan', ai: 'AI Assistant',
+      users: 'Manajemen Akun'
+    };
+
+    const tabs = document.querySelectorAll('.sidebar-item[data-tab]');
+    tabs.forEach(t => t.addEventListener('click', () => { switchTab(t.dataset.tab); if (window.innerWidth <= 960) toggleSidebar(false); }));
     document.getElementById('refreshBtn').onclick = loadSubmissions;
 
-    function escapeHtml(value) {
-      return String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;');
-    }
-
-    function formatDate(value) {
-      if (!value) return '-';
-      return new Date(value).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+    function toggleSidebar(force) {
+      const open = force !== undefined ? force : !document.getElementById('sidebar').classList.contains('open');
+      document.getElementById('sidebar').classList.toggle('open', open);
+      document.getElementById('sidebarOverlay').classList.toggle('show', open);
     }
 
     function courseTitle(id) {
@@ -313,21 +475,30 @@
     }
 
     async function fetchCoreData() {
-      const [courses, assignments, submissions, materials, users, bank] = await Promise.all([
-        fetch('/api/courses').then(r => r.json()),
-        fetch('/api/assignments').then(r => r.json()),
-        fetch('/api/submissions/submissions').then(r => r.json()),
-        fetch('/api/materials').then(r => r.json()),
-        fetch('/api/auth/users').then(r => r.json()),
-        fetch('/api/question-bank').then(r => r.json())
-      ]);
-      allCourses = courses;
-      allAssignments = assignments;
-      allSubmissions = submissions;
-      allMaterials = materials;
-      allUsers = users;
-      allBankItems = bank;
-      hydrateSelects();
+      showPageLoader(true);
+      try {
+        const [courses, assignments, submissions, materials, libraryItems, users, bank] = await Promise.all([
+          fetch('/api/courses').then(r => r.json()),
+          fetch('/api/assignments').then(r => r.json()),
+          fetch('/api/submissions/submissions').then(r => r.json()),
+          fetch('/api/materials').then(r => r.json()),
+          fetch('/api/library').then(r => r.json()),
+          fetch('/api/auth/users').then(r => r.json()),
+          fetch('/api/question-bank').then(r => r.json())
+        ]);
+        allCourses = courses;
+        allAssignments = assignments;
+        allSubmissions = submissions;
+        allMaterials = materials;
+        allLibraryItems = libraryItems;
+        allUsers = users;
+        allBankItems = bank;
+        hydrateSelects();
+      } catch {
+        showToast('Gagal memuat data server.', 'error');
+      } finally {
+        showPageLoader(false);
+      }
     }
 
     function courseOptions(includeAll = false) {
@@ -336,11 +507,11 @@
     }
 
     function hydrateSelects() {
-      ['aCourse', 'mCourse'].forEach(id => {
+      ['aCourse', 'mCourse', 'libCourse'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.innerHTML = courseOptions(false);
       });
-      ['assignmentCourseFilter', 'materialCourseFilter', 'submissionCourseFilter', 'gradeCourseFilter'].forEach(id => {
+      ['assignmentCourseFilter', 'materialCourseFilter', 'libraryCourseFilter', 'submissionCourseFilter', 'gradeCourseFilter'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.innerHTML = courseOptions(true);
       });
@@ -356,6 +527,7 @@
       tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === name));
       document.querySelectorAll('.tab-section').forEach(s => s.classList.add('hidden'));
       document.getElementById('sec-' + name).classList.remove('hidden');
+      document.getElementById('pageTitle').textContent = TAB_TITLES[name] || name;
       await fetchCoreData();
       if (name === 'dashboard') renderDashboard();
       if (name === 'courses') renderCourses();
@@ -363,9 +535,169 @@
       if (name === 'questionbank') renderQuestionBank();
       if (name === 'gradebook') renderGradebook();
       if (name === 'materials') renderMaterials();
+      if (name === 'library') renderLibrary();
       if (name === 'submissions') renderSubmissions();
+      if (name === 'ai') renderAI();
       if (name === 'users') renderUsers();
     }
+
+    function aiHeaders() {
+      const user = JSON.parse(localStorage.getItem('hlms_user') || '{}');
+      return { 'Content-Type': 'application/json', 'X-User-Role': user.role || '' };
+    }
+
+    function aiFetch(url, body) {
+      return fetch(url, { method: 'POST', headers: aiHeaders(), body: JSON.stringify(body) }).then(r => r.json());
+    }
+
+    function showAiResult(id, text, loading = false) {
+      const el = document.getElementById(id);
+      el.classList.remove('hidden');
+      el.textContent = loading ? 'Memproses... (bisa 10–30 detik)' : text;
+    }
+
+    async function renderAI() {
+      try {
+        const status = await fetch('/api/ai/status', { headers: aiHeaders() }).then(r => r.json());
+        document.getElementById('aiStatus').textContent = status.online
+          ? `✅ AI online — model: ${status.model}`
+          : '❌ AI offline — jalankan docker compose / Ollama';
+      } catch {
+        document.getElementById('aiStatus').textContent = '❌ Tidak bisa menghubungi server AI';
+      }
+      const picker = document.getElementById('aiQuestionPicker');
+      picker.innerHTML = allBankItems.length
+        ? allBankItems.map(item => `<option value="${item.id}">${escapeHtml((item.category || 'Umum') + ' - ' + item.prompt.slice(0, 60))}</option>`).join('')
+        : '<option value="">Belum ada bank soal</option>';
+    }
+
+    async function runAnalyzeQuestion() {
+      const picker = document.getElementById('aiQuestionPicker');
+      const item = allBankItems.find(i => i.id === picker.value);
+      const prompt = document.getElementById('aiQuestionText').value.trim() || item?.prompt || '';
+      if (!prompt) return showToast('Isi soal terlebih dahulu', 'warning');
+      showAiResult('aiAnalyzeResult', '', true);
+      try {
+        const data = await aiFetch('/api/ai/analyze-question', {
+          prompt,
+          options: item?.choices?.join(', '),
+          answer: item?.answer
+        });
+        showAiResult('aiAnalyzeResult', data.result || data.error || 'Gagal memproses');
+      } catch {
+        showAiResult('aiAnalyzeResult', 'Gagal menghubungi AI');
+      }
+    }
+
+    async function runSummarize() {
+      const text = document.getElementById('aiSummarizeText').value.trim();
+      if (!text) return showToast('Paste teks dokumen terlebih dahulu', 'warning');
+      showAiResult('aiSummarizeResult', '', true);
+      try {
+        const data = await aiFetch('/api/ai/summarize', { text });
+        showAiResult('aiSummarizeResult', data.result || data.error || 'Gagal memproses');
+      } catch {
+        showAiResult('aiSummarizeResult', 'Gagal menghubungi AI');
+      }
+    }
+
+    async function runCleanOcr() {
+      const text = document.getElementById('aiOcrText').value.trim();
+      if (!text) return showToast('Paste teks tulisan murid terlebih dahulu', 'warning');
+      showAiResult('aiOcrResult', '', true);
+      try {
+        const data = await aiFetch('/api/ai/clean-ocr', { text });
+        showAiResult('aiOcrResult', data.result || data.error || 'Gagal memproses');
+      } catch {
+        showAiResult('aiOcrResult', 'Gagal menghubungi AI');
+      }
+    }
+
+    let aiChatOpen = false;
+    let aiChatHistory = [];
+    let aiChatBusy = false;
+
+    function toggleAiChat(force) {
+      aiChatOpen = force !== undefined ? force : !aiChatOpen;
+      document.getElementById('aiChatPanel').classList.toggle('hidden', !aiChatOpen);
+      document.getElementById('aiChatToggle').classList.toggle('active', aiChatOpen);
+      if (aiChatOpen) {
+        initAiChat();
+        document.getElementById('aiChatInput').focus();
+      }
+    }
+
+    function appendChatMessage(role, content, loading = false) {
+      const box = document.getElementById('aiChatMessages');
+      const msg = document.createElement('div');
+      msg.className = `ai-chat-msg ai-chat-msg-${role}${loading ? ' ai-chat-msg-loading' : ''}`;
+      msg.textContent = content;
+      if (loading) msg.dataset.loading = '1';
+      box.appendChild(msg);
+      box.scrollTop = box.scrollHeight;
+      return msg;
+    }
+
+    function removeLoadingChatMessage() {
+      document.querySelector('#aiChatMessages [data-loading="1"]')?.remove();
+    }
+
+    async function initAiChat() {
+      const box = document.getElementById('aiChatMessages');
+      if (box.childElementCount) return;
+      appendChatMessage('bot', 'Halo! Saya EduLAN AI. Tanyakan apa saja seputar analisis soal, rangkum materi, atau evaluasi jawaban murid.');
+      try {
+        const status = await fetch('/api/ai/status', { headers: aiHeaders() }).then(r => r.json());
+        document.getElementById('aiChatStatus').textContent = status.online ? 'Online' : 'Offline';
+        document.getElementById('aiChatStatus').classList.toggle('offline', !status.online);
+      } catch {
+        document.getElementById('aiChatStatus').textContent = 'Offline';
+        document.getElementById('aiChatStatus').classList.add('offline');
+      }
+    }
+
+    async function sendChatMessage() {
+      const input = document.getElementById('aiChatInput');
+      const message = input.value.trim();
+      if (!message || aiChatBusy) return;
+      input.value = '';
+      await sendChatSuggestion(message);
+    }
+
+    async function sendChatSuggestion(text) {
+      if (aiChatBusy) return;
+      if (!aiChatOpen) toggleAiChat(true);
+      aiChatBusy = true;
+      document.getElementById('aiChatSend').disabled = true;
+      appendChatMessage('user', text);
+      appendChatMessage('bot', 'Sedang mengetik...', true);
+      try {
+        const data = await aiFetch('/api/ai/chat', { message: text, history: aiChatHistory });
+        removeLoadingChatMessage();
+        const reply = data.result || data.error || 'Maaf, gagal memproses.';
+        appendChatMessage('bot', reply);
+        aiChatHistory.push({ role: 'user', content: text });
+        aiChatHistory.push({ role: 'assistant', content: reply });
+        if (aiChatHistory.length > 10) aiChatHistory = aiChatHistory.slice(-10);
+      } catch {
+        removeLoadingChatMessage();
+        appendChatMessage('bot', 'Gagal menghubungi AI. Pastikan Ollama sedang berjalan.');
+      } finally {
+        aiChatBusy = false;
+        document.getElementById('aiChatSend').disabled = false;
+      }
+    }
+
+    (function initChatInput() {
+      const chatInput = document.getElementById('aiChatInput');
+      if (!chatInput) return;
+      chatInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          sendChatMessage();
+        }
+      });
+    })();
 
     function renderDashboard() {
       const graded = allSubmissions.filter(item => item.grade !== undefined && item.grade !== null).length;
@@ -374,6 +706,7 @@
       document.getElementById('statBank').innerText = allBankItems.length;
       document.getElementById('statSubs').innerText = allSubmissions.length;
       document.getElementById('statMats').innerText = allMaterials.length;
+      document.getElementById('statLibrary').innerText = allLibraryItems.length;
       document.getElementById('statPending').innerText = allSubmissions.length - graded;
       document.getElementById('recentCourses').innerHTML = allCourses.slice(0, 5).map(c => `
         <button class="mini-row" onclick="switchTab('courses')"><span><strong>${escapeHtml(c.title)}</strong><small>${escapeHtml(c.code || 'Tidak ada kode')}</small></span><span class="badge ${c.archived ? 'badge-warning' : 'badge-success'}">${c.archived ? 'Arsip' : 'Aktif'}</span></button>
@@ -397,19 +730,21 @@
         archived: document.getElementById('cArchived').value === 'true',
         description: document.getElementById('cDesc').value.trim()
       };
-      if (!payload.title) return alert('Nama kelas wajib diisi');
+      if (!payload.title) return showToast('Nama kelas wajib diisi', 'error');
       await fetch('/api/courses', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       e.target.reset();
       document.getElementById('courseFormCard').classList.add('hidden');
       await fetchCoreData();
       renderCourses();
       renderDashboard();
+      showToast('Kelas berhasil dibuat', 'success');
     };
 
     function renderCourses() {
       document.getElementById('courseList').innerHTML = allCourses.map(c => {
         const activityCount = allAssignments.filter(a => a.courseId === c.id).length;
         const materialCount = allMaterials.filter(m => m.courseId === c.id).length;
+        const libraryCount = allLibraryItems.filter(item => item.courseId === c.id).length;
         return `
           <div class="card course-card">
             <div class="flex justify-between items-start gap-md">
@@ -420,7 +755,7 @@
               </div>
               <button class="btn btn-sm btn-danger" onclick="deleteCourse('${c.id}')">Hapus</button>
             </div>
-            <div class="course-metrics mt-md"><span>${activityCount} aktivitas</span><span>${materialCount} materi</span><span>${allSubmissions.filter(s => s.courseId === c.id).length} submission</span></div>
+            <div class="course-metrics mt-md"><span>${activityCount} aktivitas</span><span>${materialCount} materi</span><span>${libraryCount} library</span><span>${allSubmissions.filter(s => s.courseId === c.id).length} submission</span></div>
           </div>
         `;
       }).join('') || '<div class="empty-state">Belum ada kelas.</div>';
@@ -502,16 +837,16 @@
     async function saveDraftToBank(id) {
       syncDraftInputs();
       const q = questionDrafts.find(item => item.draftId === id);
-      if (!q || !q.prompt.trim()) return alert('Pertanyaan wajib diisi sebelum disimpan ke bank');
+      if (!q || !q.prompt.trim()) return showToast('Pertanyaan wajib diisi sebelum disimpan ke bank', 'error');
       await fetch('/api/question-bank', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...q, category: 'Dari Tugas', difficulty: 'medium', choices: q.type === 'mcq' ? q.choices.map(c => c.trim()).filter(Boolean) : [] }) });
       await fetchCoreData();
-      alert('Soal tersimpan ke bank soal');
+      showToast('Soal tersimpan ke bank soal', 'success');
     }
 
     function addSelectedBankQuestion() {
       const id = document.getElementById('questionBankPicker').value;
       const item = allBankItems.find(q => q.id === id);
-      if (!item) return alert('Pilih soal dari bank terlebih dahulu');
+      if (!item) return showToast('Pilih soal dari bank terlebih dahulu', 'warning');
       syncDraftInputs();
       questionDrafts.push({ draftId: Date.now().toString() + Math.random().toString(16).slice(2), type: item.type, prompt: item.prompt, choices: item.choices || [], answer: item.answer || '', points: item.points || 1 });
       renderQuestionBuilder();
@@ -534,12 +869,12 @@
         attemptLimit: document.getElementById('aAttemptLimit').value,
         questions
       };
-      if (!title) return alert('Judul wajib diisi');
-      if (!questions.length) return alert('Tambahkan minimal satu pertanyaan');
-      if (payload.autoCheck && !questions.some(q => q.answer)) return alert('Isi minimal satu kunci jawaban untuk auto check');
+      if (!title) return showToast('Judul wajib diisi', 'error');
+      if (!questions.length) return showToast('Tambahkan minimal satu pertanyaan', 'error');
+      if (payload.autoCheck && !questions.some(q => q.answer)) return showToast('Isi minimal satu kunci jawaban untuk auto check', 'error');
       const res = await fetch('/api/assignments', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-      if (!res.ok) return alert('Gagal menyimpan aktivitas');
-      alert('Aktivitas berhasil disimpan');
+      if (!res.ok) return showToast('Gagal menyimpan aktivitas', 'error');
+      showToast('Aktivitas berhasil disimpan', 'success');
       resetAssignmentBuilder();
       hideAssignmentBuilder();
       await fetchCoreData();
@@ -602,7 +937,7 @@
         answer: document.getElementById('qbAnswer').value.trim(),
         points: Number(document.getElementById('qbPoints').value || 1)
       };
-      if (!payload.prompt) return alert('Pertanyaan wajib diisi');
+      if (!payload.prompt) return showToast('Pertanyaan wajib diisi', 'error');
       await fetch('/api/question-bank', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       e.target.reset();
       document.getElementById('qbCategory').value = 'Umum';
@@ -610,6 +945,7 @@
       document.getElementById('questionBankFormCard').classList.add('hidden');
       await fetchCoreData();
       renderQuestionBank();
+      showToast('Soal ditambahkan ke bank', 'success');
     };
 
     function renderQuestionBank() {
@@ -727,8 +1063,83 @@
         toggleForm('newMatForm');
         await fetchCoreData();
         renderMaterials();
+        showToast('Materi berhasil diupload', 'success');
       } catch (err) {
-        alert('Gagal upload materi: ' + err.message);
+        showToast('Gagal upload materi: ' + err.message, 'error');
+      } finally {
+        btn.innerText = originalText;
+        btn.disabled = false;
+      }
+    };
+
+    function renderLibrary() {
+      const selected = document.getElementById('libraryCourseFilter').value;
+      const items = selected ? allLibraryItems.filter(item => item.courseId === selected) : allLibraryItems;
+      document.getElementById('libraryList').innerHTML = items.map(item => {
+        const tags = (item.tags || []).map(tag => `<span class="badge badge-info">${escapeHtml(tag)}</span>`).join('');
+        const fileLink = item.fileName ? `<a href="/uploads/${item.filePath}" target="_blank" class="btn btn-sm btn-secondary">Download ${escapeHtml(item.fileName)}</a>` : '';
+        const externalLink = item.externalUrl ? `<a href="${escapeHtml(item.externalUrl)}" target="_blank" class="btn btn-sm btn-secondary">Buka Link</a>` : '';
+        return `
+          <div class="card library-card">
+            <div class="flex justify-between items-start gap-md responsive-row">
+              <div style="flex:1">
+                <div class="flex gap-sm items-center wrap-row">
+                  <strong>${escapeHtml(item.title)}</strong>
+                  <span class="badge badge-success">${escapeHtml(item.type || 'file')}</span>
+                  <span class="badge badge-info">${escapeHtml(courseTitle(item.courseId))}</span>
+                </div>
+                <p class="text-sm text-secondary mt-sm">${escapeHtml(item.description || '')}</p>
+                <p class="text-xs text-muted mt-xs">
+                  Kategori: ${escapeHtml(item.category || 'Umum')}
+                  ${item.author ? ` | Penulis: ${escapeHtml(item.author)}` : ''}
+                  ${item.publisher ? ` | Sumber: ${escapeHtml(item.publisher)}` : ''}
+                </p>
+                <div class="flex gap-sm wrap-row mt-sm">${tags}</div>
+                <div class="flex gap-sm wrap-row mt-md">${fileLink}${externalLink}</div>
+              </div>
+              <button class="btn btn-sm btn-danger" onclick="deleteLibraryItem('${item.id}')">Hapus</button>
+            </div>
+          </div>
+        `;
+      }).join('') || '<div class="empty-state">Library masih kosong.</div>';
+    }
+
+    async function deleteLibraryItem(id) {
+      if (!confirm('Hapus item library ini?')) return;
+      await fetch(`/api/library/${id}`, { method: 'DELETE' });
+      await fetchCoreData();
+      renderLibrary();
+      renderDashboard();
+    }
+
+    document.getElementById('libraryUploadForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const btn = e.target.querySelector('button[type="submit"]');
+      const originalText = btn.innerText;
+      btn.innerText = 'Menyimpan...';
+      btn.disabled = true;
+      const fd = new FormData();
+      fd.append('courseId', document.getElementById('libCourse').value);
+      fd.append('type', document.getElementById('libType').value);
+      fd.append('title', document.getElementById('libTitle').value);
+      fd.append('category', document.getElementById('libCategory').value);
+      fd.append('author', document.getElementById('libAuthor').value);
+      fd.append('publisher', document.getElementById('libPublisher').value);
+      fd.append('description', document.getElementById('libDesc').value);
+      fd.append('tags', document.getElementById('libTags').value);
+      fd.append('externalUrl', document.getElementById('libUrl').value);
+      if (document.getElementById('libFile').files.length > 0) fd.append('file', document.getElementById('libFile').files[0]);
+      try {
+        const res = await fetch('/api/library', { method: 'POST', body: fd });
+        if (!res.ok) throw new Error('Server error ' + res.status);
+        e.target.reset();
+        toggleForm('newLibraryForm');
+        await fetchCoreData();
+        renderLibrary();
+        renderDashboard();
+        showToast('Koleksi library berhasil disimpan', 'success');
+      } catch (err) {
+        showToast('Gagal menyimpan library: ' + err.message, 'error');
       } finally {
         btn.innerText = originalText;
         btn.disabled = false;
@@ -786,6 +1197,7 @@
       await fetchCoreData();
       renderSubmissions();
       renderGradebook();
+      showToast('Nilai berhasil disimpan', 'success');
     };
 
     function renderUsers() {
@@ -801,7 +1213,7 @@
     }
 
     async function deleteUser(id) {
-      if (id === 'admin') return alert('Admin default tidak bisa dihapus');
+      if (id === 'admin') return showToast('Admin default tidak bisa dihapus', 'warning');
       if (!confirm('Hapus user ini?')) return;
       await fetch(`/api/auth/users/${id}`, { method: 'DELETE' });
       await fetchCoreData();
@@ -819,7 +1231,7 @@
         renderUsers();
       } else {
         const data = await res.json();
-        alert('Gagal: ' + data.error);
+        showToast('Gagal: ' + data.error, 'error');
       }
     };
 
@@ -830,19 +1242,27 @@
     function toggleForm(id) { document.getElementById(id).classList.toggle('hidden'); }
     function closeModal(id) { document.getElementById(id).classList.remove('show'); }
 
-    const user = JSON.parse(localStorage.getItem('hlms_user'));
-    if (!user || user.role !== 'teacher') {
-      window.location.href = '/index.html';
-    } else {
-      document.getElementById('userNameDisplay').innerText = user.name || user.username;
+    const user = requireAuth('teacher');
+    if (user) {
+      const name = user.name || user.username;
+      document.getElementById('userNameDisplay').textContent = name;
+      document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+      const navInit = document.getElementById('navUserInitials');
+      const navName = document.getElementById('navUserName');
+      if (navInit) navInit.textContent = getInitials(name);
+      if (navName) navName.textContent = name;
       resetAssignmentBuilder();
+      initThemeToggle(document.getElementById('themeToggleSlot'));
+      document.getElementById('recentCourses').innerHTML = skeletonCards(3);
+      document.getElementById('recentSubmissions').innerHTML = skeletonCards(3);
       fetchCoreData().then(renderDashboard);
     }
 
-    function logout() {
-      localStorage.removeItem('hlms_user');
-      window.location.href = '/index.html';
+    function checkMobileMenu() {
+      document.getElementById('menuToggle').style.display = window.innerWidth <= 960 ? 'inline-flex' : 'none';
     }
+    window.addEventListener('resize', checkMobileMenu);
+    checkMobileMenu();
   </script>
 </body>
 </html>
