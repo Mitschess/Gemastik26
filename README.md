@@ -1,10 +1,10 @@
 # Gemastik26
 Pak Suhadi selalu di hati
 
-# 1. Install Docker Desktop dulu → restart PC
+# 1. Install Docker Desktop dulu awal awal disuruh restart PC
 
 # 2. Clone & jalankan
-git clone https://github.com/<username>/<repo>.git
+git clone 
 
 cd hotspot-lms
 
@@ -18,11 +18,12 @@ docker compose exec ollama ollama pull qwen2.5:1.5b
 # 4. Buka browser
 # http://localhost:5000 → login guru → AI Assistant
 
+# buat runnya 
 masuk ke cd ../lms/server
 
 nanti run npm run dev
 
-kalau sukses muncul
+# kalau sukses muncul
 
  Meet signaling WebSocket ready at /ws/meet
 
