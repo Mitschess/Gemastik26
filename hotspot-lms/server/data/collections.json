@@ -1,0 +1,24 @@
+[
+  {
+    "id": "9521fb14-9b0b-467a-9055-a54b0908bad3",
+    "title": "Dasar-Dasar Jaringan Komputer",
+    "description": "Paket demo EduLAN untuk mengenal konsep LAN, perangkat jaringan, dan alamat IP secara offline.",
+    "thumbnail": "packages/9521fb14-9b0b-467a-9055-a54b0908bad3/cover.svg",
+    "version": "1.0.0",
+    "author": "Tim EduLAN",
+    "format": "EduLAN Package",
+    "resourceCount": 3,
+    "installedAt": "2026-07-04T15:07:12.370Z"
+  },
+  {
+    "id": "a6d7db6f-12da-4d63-b209-6a59d051a2c6",
+    "title": "Roblox Battle Demo",
+    "description": "Demo package",
+    "thumbnail": "packages/a6d7db6f-12da-4d63-b209-6a59d051a2c6/cover.png",
+    "version": "1.0.0",
+    "author": "Nathan",
+    "format": "EduLAN Package",
+    "resourceCount": 3,
+    "installedAt": "2026-07-04T15:13:05.328Z"
+  }
+]
