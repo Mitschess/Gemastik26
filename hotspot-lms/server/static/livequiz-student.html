@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Live Quiz | EduLAN</title>
+  <script>!function(){var t=localStorage.getItem('edulan_theme'),d=matchMedia('(prefers-color-scheme:dark)').matches;document.documentElement.setAttribute('data-theme',t||(d?'dark':'light'))}();</script>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body class="classroom-body">
+  <nav class="edw-navbar" aria-label="Navigasi utama">
+    <a href="/student.html" class="edw-navbar-brand">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+      EduLAN Classroom
+    </a>
+    <div class="edw-sub-nav">
+      <div class="edw-primary-nav">
+        <ul class="edw-nav-list">
+          <li class="edw-nav-item"><a href="/dashboard.html" class="edw-nav-link">Beranda</a></li>
+          <li class="edw-nav-item"><a href="/student.html" class="edw-nav-link">Dashboard</a></li>
+          <li class="edw-nav-item"><a href="#" class="edw-nav-link active" onclick="return false">Live Quiz</a></li>
+        </ul>
+      </div>
+      <div class="edw-user-nav">
+        <span id="themeToggleSlot"></span>
+        <div class="edw-nav-divider"></div>
+        <div class="edw-user-menu">
+          <button class="edw-user-btn" onclick="toggleUserMenu()" aria-label="Menu pengguna">
+            <span class="edw-user-initials" id="navUserInitials">S</span>
+          </button>
+          <div class="edw-dropdown" id="userDropdown">
+            <div class="edw-dropdown-item" style="cursor:default;font-weight:600" id="navUserName">Siswa</div>
+            <button class="edw-dropdown-item" onclick="logout()">🚪 Keluar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container" style="margin-top:calc(var(--navbar-height) + 24px);padding-bottom:80px">
+
+    <!-- ============ VIEW: LIST ============ -->
+    <section id="lq-view-list">
+      <div class="lq-hero">
+        <div>
+          <div class="badge badge-info mb-md">Live Quiz</div>
+          <h1>Kuis interaktif sedang dibuka</h1>
+          <p class="text-secondary mt-sm">Gabung ke live quiz yang sedang dibuka gurumu, lalu jawab secepat dan setepat mungkin.</p>
+        </div>
+        <button class="btn btn-sm btn-secondary" onclick="refreshQuizList()">Refresh</button>
+      </div>
+
+      <div class="card mt-lg" id="joinByCodeCard">
+        <h3>Gabung Live Quiz dengan Kode</h3>
+        <p class="text-sm text-secondary mt-sm">Punya kode dari guru? Kuis privat tidak muncul di daftar bawah, masukkan kodenya di sini untuk langsung join.</p>
+        <form class="flex gap-sm mt-md" style="flex-wrap:wrap" onsubmit="return submitJoinByCode(event)">
+          <input class="input" id="joinByCodeInput" placeholder="Kode Live Quiz" maxlength="6" style="max-width:220px;text-transform:uppercase;letter-spacing:2px" />
+          <button type="submit" class="btn btn-primary">Gabung</button>
+        </form>
+      </div>
+
+      <div id="joinableGrid" class="lq-quiz-grid mt-lg"></div>
+    </section>
+
+    <!-- ============ VIEW: WAITING ROOM ============ -->
+    <section id="lq-view-waiting" class="hidden">
+      <div class="lq-hero">
+        <div>
+          <span class="lq-status-badge lq-status-waiting">Waiting Room</span>
+          <h1 id="waitingTitle" class="mt-sm">Menunggu guru memulai...</h1>
+          <p class="text-secondary mt-sm">Guru: <strong id="waitingTeacher">-</strong>. Kuis akan mulai otomatis begitu guru menekan "Mulai Quiz".</p>
+        </div>
+        <button class="btn btn-sm btn-secondary" onclick="leaveWaiting()">Batal / Kembali</button>
+      </div>
+      <div class="card mt-lg">
+        <h3>Murid Bergabung (<span id="participantCount">0</span>)</h3>
+        <div id="participantList" class="lq-waiting-list"></div>
+      </div>
+    </section>
+
+    <!-- ============ VIEW: PLAY ============ -->
+    <section id="lq-view-play" class="hidden">
+      <div class="lq-play-wrap">
+        <div class="lq-play-timer">Soal <span id="playQIndex">-</span> / <span id="playQTotal">-</span> · Sisa waktu <strong id="playTimeLeft">-</strong>s</div>
+        <div class="lq-play-progressbar"><div class="lq-play-progressbar-fill" id="playTimerBar" style="width:100%"></div></div>
+        <div id="playFeedback"></div>
+        <div class="lq-play-prompt" id="playPrompt">Menunggu soal...</div>
+        <div class="lq-choice-list" id="playChoices"></div>
+      </div>
+    </section>
+
+    <!-- ============ VIEW: FINAL ============ -->
+    <section id="lq-view-final" class="hidden">
+      <div class="lq-hero">
+        <div>
+          <span class="lq-status-badge lq-status-finished">Selesai</span>
+          <h1 id="finalTitle" class="mt-sm">Kuis Selesai!</h1>
+        </div>
+        <div class="flex gap-sm">
+          <button class="btn btn-secondary" onclick="openMyReview()">Lihat Review Jawaban Saya</button>
+          <button class="btn btn-primary" onclick="backToListFromFinal()">Kembali ke Live Quiz</button>
+        </div>
+      </div>
+      <div class="card mt-lg">
+        <h3>Hasil Saya</h3>
+        <div class="flex gap-md mt-sm" style="font-size:1.05rem">
+          <span class="lq-stat-correct">✔ Benar: <strong id="myCorrect">0</strong></span>
+          <span class="lq-stat-wrong">✕ Salah: <strong id="myWrong">0</strong></span>
+        </div>
+      </div>
+      <div class="section-header mt-lg"><div><h2>Papan Peringkat</h2></div></div>
+      <div id="finalLeaderboard"></div>
+    </section>
+
+  </main>
+
+  <!-- Review modal -->
+  <div class="modal-overlay" id="reviewModal">
+    <div class="modal" style="max-width:640px">
+      <div class="modal-header"><h3>Review Jawaban Saya</h3><button class="icon-btn" onclick="document.getElementById('reviewModal').classList.remove('show')">✕</button></div>
+      <div id="reviewModalBody" class="mt-md"></div>
+    </div>
+  </div>
+
+  <!-- Countdown overlay -->
+  <div class="lq-countdown-overlay hidden" id="countdownOverlay">
+    <div>Kuis akan dimulai dalam</div>
+    <div class="lq-countdown-number" id="countdownNumber">3</div>
+  </div>
+
+  <script src="/app.js"></script>
+  <script>
+    const currentUser = requireAuth('student');
+    const myStudentId = currentUser ? (currentUser.studentId || currentUser.id) : null;
+    const myStudentName = currentUser ? (currentUser.name || currentUser.username) : null;
+
+    let joinedQuizId = localStorage.getItem('lq_joined_quiz_id') || null;
+    let pollHandle = null;
+    let currentQuestionId = null;
+    let answeredThisQuestion = false;
+
+    function api(url, opts) {
+      return fetch(url, opts).then(async r => {
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(data.error || 'Gagal memproses permintaan');
+        return data;
+      });
+    }
+
+    function stopPolling() { if (pollHandle) { clearInterval(pollHandle); pollHandle = null; } }
+
+    function hideAllViews() {
+      ['list','waiting','play','final'].forEach(v => document.getElementById('lq-view-' + v).classList.add('hidden'));
+      document.getElementById('countdownOverlay').classList.add('hidden');
+    }
+
+    /* ---------- LIST ---------- */
+
+    async function submitJoinByCode(evt) {
+      evt.preventDefault();
+      const input = document.getElementById('joinByCodeInput');
+      const code = (input.value || '').trim().toUpperCase();
+      if (!code) return false;
+      try {
+        const data = await api('/api/live-quiz/join-by-code', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code, studentId: myStudentId, studentName: myStudentName })
+        });
+        input.value = '';
+        joinedQuizId = data.liveQuizId;
+        localStorage.setItem('lq_joined_quiz_id', data.liveQuizId);
+        enterWaiting(data.liveQuizId);
+      } catch (e) { showToast(e.message || 'Kode tidak valid.', 'error'); }
+      return false;
+    }
+
+    async function refreshQuizList() {
+      try {
+        const list = await api('/api/live-quiz?availableToJoin=true');
+        document.getElementById('joinableGrid').innerHTML = list.length ? list.map(q => `
+          <div class="lq-quiz-card">
+            <h3>${escapeHtml(q.title)}</h3>
+            <div class="lq-teacher">Oleh: ${escapeHtml(q.teacherName || 'Guru')}</div>
+            <div class="text-sm text-secondary">${q.totalQuestions} soal</div>
+            <div class="lq-quiz-card-footer">
+              <span class="badge badge-info">Terbuka</span>
+              <button class="btn btn-sm btn-primary" onclick="joinQuiz('${q.id}')">Join</button>
+            </div>
+          </div>
+        `).join('') : '<div class="empty-state"><div class="empty-state-icon">🎮</div><p>Belum ada live quiz yang dibuka guru saat ini.</p></div>';
+      } catch { showToast('Gagal memuat daftar live quiz.', 'error'); }
+    }
+
+    async function joinQuiz(id) {
+      try {
+        await api(`/api/live-quiz/${id}/join`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ studentId: myStudentId, studentName: myStudentName })
+        });
+        joinedQuizId = id;
+        localStorage.setItem('lq_joined_quiz_id', id);
+        enterWaiting(id);
+      } catch (e) { showToast(e.message, 'error'); }
+    }
+
+    function leaveWaiting() {
+      stopPolling();
+      joinedQuizId = null;
+      localStorage.removeItem('lq_joined_quiz_id');
+      hideAllViews();
+      document.getElementById('lq-view-list').classList.remove('hidden');
+      refreshQuizList();
+    }
+
+    /* ---------- WAITING ROOM ---------- */
+
+    async function enterWaiting(id) {
+      joinedQuizId = id;
+      stopPolling();
+      hideAllViews();
+      document.getElementById('lq-view-waiting').classList.remove('hidden');
+      try {
+        const quiz = await api(`/api/live-quiz/${id}?role=student`);
+        document.getElementById('waitingTitle').textContent = quiz.title;
+        document.getElementById('waitingTeacher').textContent = quiz.teacherName || 'Guru';
+      } catch { /* keep polling, may recover */ }
+      pollWaitingState();
+      pollHandle = setInterval(pollWaitingState, 2000);
+    }
+
+    async function pollWaitingState() {
+      if (!joinedQuizId) return;
+      try {
+        const [quiz, participants] = await Promise.all([
+          api(`/api/live-quiz/${joinedQuizId}?role=student`),
+          api(`/api/live-quiz/${joinedQuizId}/participants`)
+        ]);
+        document.getElementById('participantCount').textContent = participants.length;
+        document.getElementById('participantList').innerHTML = participants.length ? participants.map(p => `
+          <div class="lq-waiting-chip"><span class="lq-dot"></span>${escapeHtml(p.studentName)}${p.studentId === myStudentId ? ' (kamu)' : ''}</div>
+        `).join('') : '<p class="text-sm text-muted">Belum ada murid lain yang join.</p>';
+
+        if (quiz.status === 'countdown' || quiz.status === 'active') enterPlay(joinedQuizId);
+      } catch {
+        showToast('Live quiz ini sudah tidak tersedia.', 'error');
+        leaveWaiting();
+      }
+    }
+
+    /* ---------- PLAY ---------- */
+
+    const POLL_MS_NORMAL = 1000;
+    const POLL_MS_FAST = 300; // dipakai begitu murid sudah menjawab, supaya soal berikutnya langsung muncul tanpa nunggu interval normal
+    let activeQuizSettings = null;
+
+    async function enterPlay(id) {
+      joinedQuizId = id;
+      stopPolling();
+      hideAllViews();
+      document.getElementById('lq-view-play').classList.remove('hidden');
+      currentQuestionId = null;
+      answeredThisQuestion = false;
+      try {
+        const quiz = await api(`/api/live-quiz/${id}?role=student`);
+        activeQuizSettings = quiz.settings || null;
+      } catch { activeQuizSettings = null; }
+      pollPlayState();
+      pollHandle = setInterval(pollPlayState, POLL_MS_NORMAL);
+    }
+
+    function setPollSpeed(fast) {
+      stopPolling();
+      pollHandle = setInterval(pollPlayState, fast ? POLL_MS_FAST : POLL_MS_NORMAL);
+    }
+
+    async function pollPlayState() {
+      if (!joinedQuizId) return;
+      try {
+        const p = await api(`/api/live-quiz/${joinedQuizId}/progress?studentId=${encodeURIComponent(myStudentId)}`);
+        const overlay = document.getElementById('countdownOverlay');
+
+        if (p.status === 'finished') { enterFinal(joinedQuizId); return; }
+
+        if (p.status === 'countdown') {
+          overlay.classList.remove('hidden');
+          document.getElementById('countdownNumber').textContent = p.timeLeftSec;
+          return;
+        }
+        overlay.classList.add('hidden');
+
+        if (p.status !== 'active') return;
+
+        document.getElementById('playQTotal').textContent = p.totalQuestions;
+
+        // Murid ini sudah menjawab semua soal (self-paced) sebelum murid lain selesai:
+        // tampilkan layar menunggu, tanpa perlu ikut menunggu timer murid lain.
+        if (p.myFinished) {
+          setPollSpeed(false);
+          document.getElementById('playQIndex').textContent = p.totalQuestions;
+          document.getElementById('playTimeLeft').textContent = '-';
+          document.getElementById('playTimerBar').style.width = '100%';
+          document.getElementById('playPrompt').textContent = 'Kamu sudah menyelesaikan semua soal!';
+          document.getElementById('playChoices').innerHTML = '';
+          document.getElementById('playFeedback').innerHTML = '<div class="lq-feedback-banner lq-feedback-correct">Menunggu murid lain menyelesaikan kuis...</div>';
+          currentQuestionId = null;
+          return;
+        }
+
+        const sq = p.myQuestion;
+        if (!sq) return;
+
+        document.getElementById('playQIndex').textContent = sq.index + 1;
+        document.getElementById('playTimeLeft').textContent = sq.timeLeftSec;
+        const totalPerQ = (activeQuizSettings && activeQuizSettings.timePerQuestionSec) || sq.timeLeftSec || 1;
+        const pct = Math.max(0, Math.min(100, Math.round((sq.timeLeftSec / totalPerQ) * 100)));
+        document.getElementById('playTimerBar').style.width = pct + '%';
+
+        if (sq.questionId !== currentQuestionId) {
+          currentQuestionId = sq.questionId;
+          answeredThisQuestion = false;
+          setPollSpeed(false); // soal baru sudah tampil, balik ke interval polling normal
+          document.getElementById('playFeedback').innerHTML = '';
+          document.getElementById('playPrompt').textContent = sq.prompt;
+          document.getElementById('playChoices').innerHTML = sq.choices.map((c, ci) => `
+            <button class="lq-choice-btn" data-choice-idx="${ci}" onclick="submitAnswer(${ci})">${String.fromCharCode(65 + ci)}. ${escapeHtml(c)}</button>
+          `).join('');
+        }
+      } catch {
+        showToast('Live quiz ini sudah tidak tersedia.', 'error');
+        stopPolling();
+        joinedQuizId = null;
+        localStorage.removeItem('lq_joined_quiz_id');
+        hideAllViews();
+        document.getElementById('lq-view-list').classList.remove('hidden');
+        refreshQuizList();
+      }
+    }
+
+    async function submitAnswer(choiceIndex) {
+      if (answeredThisQuestion || !currentQuestionId) return;
+      answeredThisQuestion = true;
+      const buttons = document.querySelectorAll('#playChoices .lq-choice-btn');
+      buttons.forEach(b => b.disabled = true);
+      buttons[choiceIndex]?.classList.add('lq-selected');
+      try {
+        const res = await api(`/api/live-quiz/${joinedQuizId}/answer`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ studentId: myStudentId, questionId: currentQuestionId, choiceIndex })
+        });
+        buttons[choiceIndex]?.classList.remove('lq-selected');
+        buttons[choiceIndex]?.classList.add(res.correct ? 'lq-correct' : 'lq-wrong');
+        document.getElementById('playFeedback').innerHTML = `<div class="lq-feedback-banner ${res.correct ? 'lq-feedback-correct' : 'lq-feedback-wrong'}">${res.correct ? '✔ Jawaban Benar!' : '✕ Jawaban Salah'}</div>`;
+        // Murid sudah menjawab: langsung tampilkan status "menunggu soal berikutnya"
+        // dan percepat polling, supaya begitu server pindah soal, layar murid langsung
+        // lanjut tanpa perlu menunggu waktu di layar ini habis.
+        setTimeout(() => {
+          if (answeredThisQuestion) {
+            document.getElementById('playChoices').innerHTML = '<p class="text-sm text-muted mt-sm">Menunggu soal berikutnya...</p>';
+          }
+        }, 700);
+        setPollSpeed(true);
+      } catch (e) {
+        showToast(e.message, 'error');
+        answeredThisQuestion = false;
+        buttons.forEach(b => b.disabled = false);
+      }
+    }
+
+    /* ---------- FINAL ---------- */
+
+    async function enterFinal(id) {
+      joinedQuizId = id;
+      stopPolling();
+      hideAllViews();
+      document.getElementById('lq-view-final').classList.remove('hidden');
+      try {
+        const r = await api(`/api/live-quiz/${id}/results`);
+        document.getElementById('finalTitle').textContent = r.title;
+        const mine = r.leaderboard.find(p => p.studentId === myStudentId);
+        document.getElementById('myCorrect').textContent = mine ? mine.correctCount : 0;
+        document.getElementById('myWrong').textContent = mine ? mine.wrongCount : 0;
+        document.getElementById('finalLeaderboard').innerHTML = r.leaderboard.map(p => `
+          <div class="lq-leaderboard-row ${p.isTopThree ? 'lq-top3' : ''}" style="${p.studentId === myStudentId ? 'outline:2px solid var(--accent)' : ''}">
+            <div class="lq-leaderboard-rank">${p.rank}</div>
+            <div class="lq-leaderboard-name">${escapeHtml(p.studentName)}${p.studentId === myStudentId ? ' (kamu)' : ''}</div>
+            <div class="lq-progress-stats"><span class="lq-stat-correct">Benar ${p.correctCount}</span><span class="lq-stat-wrong">Salah ${p.wrongCount}</span></div>
+          </div>
+        `).join('');
+      } catch (e) { showToast(e.message, 'error'); }
+    }
+
+    async function openMyReview() {
+      try {
+        const r = await api(`/api/live-quiz/${joinedQuizId}/review/${myStudentId}`);
+        document.getElementById('reviewModalBody').innerHTML = r.review.map((q, idx) => `
+          <div class="lq-review-item">
+            <strong>${idx + 1}. ${escapeHtml(q.prompt)}</strong>
+            <div class="mt-sm">
+              ${q.choices.map((c, ci) => `<div class="lq-review-choice ${ci === q.correctIndex ? 'lq-correct' : (ci === q.studentChoiceIndex ? 'lq-wrong-pick' : '')}">${String.fromCharCode(65 + ci)}. ${escapeHtml(c)}${ci === q.correctIndex ? ' ✓ Kunci' : ''}${ci === q.studentChoiceIndex && ci !== q.correctIndex ? ' ✕ Jawabanmu' : ''}</div>`).join('')}
+            </div>
+            ${q.studentChoiceIndex === null ? '<div class="text-xs text-muted mt-sm">Kamu tidak menjawab soal ini (timeout).</div>' : ''}
+          </div>
+        `).join('');
+        document.getElementById('reviewModal').classList.add('show');
+      } catch (e) { showToast(e.message, 'error'); }
+    }
+
+    function backToListFromFinal() {
+      joinedQuizId = null;
+      localStorage.removeItem('lq_joined_quiz_id');
+      hideAllViews();
+      document.getElementById('lq-view-list').classList.remove('hidden');
+      refreshQuizList();
+    }
+
+    /* ---------- INIT / RESUME ---------- */
+
+    async function init() {
+      if (!currentUser) return;
+      const name = myStudentName;
+      document.getElementById('navUserName').textContent = name;
+      document.getElementById('navUserInitials').textContent = getInitials(name);
+      initThemeToggle(document.getElementById('themeToggleSlot'));
+
+      if (joinedQuizId) {
+        try {
+          const quiz = await api(`/api/live-quiz/${joinedQuizId}?role=student`);
+          if (quiz.status === 'waiting') { enterWaiting(joinedQuizId); return; }
+          if (quiz.status === 'countdown' || quiz.status === 'active') { enterPlay(joinedQuizId); return; }
+          if (quiz.status === 'finished') { enterFinal(joinedQuizId); return; }
+        } catch { localStorage.removeItem('lq_joined_quiz_id'); joinedQuizId = null; }
+      }
+      refreshQuizList();
+      pollHandle = setInterval(() => {
+        if (document.getElementById('lq-view-list').classList.contains('hidden')) return;
+        refreshQuizList();
+      }, 4000);
+    }
+
+    init();
+  </script>
+</body>
+</html>

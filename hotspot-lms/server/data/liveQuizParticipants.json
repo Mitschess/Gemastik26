@@ -1,0 +1,32 @@
+[
+  {
+    "id": "01151e73-8fb4-4440-9109-74eab752ab3c",
+    "liveQuizId": "8d98a25d-f97d-448f-8562-91b244f5390e",
+    "studentId": "s1",
+    "studentName": "Andi",
+    "joinedAt": "2026-07-04T14:54:36.309Z",
+    "answers": [],
+    "correctCount": 0,
+    "wrongCount": 0,
+    "finished": false,
+    "finishedAt": null,
+    "qIndex": -1,
+    "qStartedAt": null,
+    "rankingScore": 0
+  },
+  {
+    "id": "1b696710-07f3-4e7f-8cf3-f71fe9068a8e",
+    "liveQuizId": "8d98a25d-f97d-448f-8562-91b244f5390e",
+    "studentId": "s2",
+    "studentName": "Budi",
+    "joinedAt": "2026-07-04T14:54:36.317Z",
+    "answers": [],
+    "correctCount": 0,
+    "wrongCount": 0,
+    "finished": false,
+    "finishedAt": null,
+    "qIndex": -1,
+    "qStartedAt": null,
+    "rankingScore": 0
+  }
+]

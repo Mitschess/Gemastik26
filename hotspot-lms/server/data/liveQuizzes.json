@@ -1,0 +1,70 @@
+[
+  {
+    "id": "8d98a25d-f97d-448f-8562-91b244f5390e",
+    "teacherId": "t1",
+    "teacherName": "Bu Ani",
+    "title": "Kuis Jaringan",
+    "status": "waiting",
+    "visibility": "public",
+    "code": "CMXG5S",
+    "questions": [
+      {
+        "id": "9baaab8c-0526-44d1-ad77-497b43fe6c6d",
+        "prompt": "Ibukota Indonesia?",
+        "choices": [
+          "Jakarta",
+          "Bandung",
+          "Surabaya"
+        ],
+        "correctIndex": 0,
+        "points": 1
+      },
+      {
+        "id": "025e7334-e95f-49b2-8e0a-47663e8a25d0",
+        "prompt": "2+2=?",
+        "choices": [
+          "3",
+          "4",
+          "5"
+        ],
+        "correctIndex": 1,
+        "sourceQuestionBankId": "1783176876121",
+        "points": 1
+      }
+    ],
+    "settings": {
+      "timePerQuestionSec": 3,
+      "shuffleAnswers": false,
+      "shuffleQuestionOrder": false
+    },
+    "sessionQuestions": [],
+    "currentQuestionIndex": -1,
+    "currentQuestionStartedAt": null,
+    "countdownStartedAt": null,
+    "createdAt": "2026-07-04T14:54:36.075Z",
+    "startedAt": null,
+    "finishedAt": null
+  },
+  {
+    "id": "5040d920-5108-4fdc-a330-7b12e5ac2e6a",
+    "teacherId": "admin",
+    "teacherName": "Default Teacher",
+    "title": "A",
+    "status": "draft",
+    "visibility": "public",
+    "code": "8VN4MR",
+    "questions": [],
+    "settings": {
+      "timePerQuestionSec": 20,
+      "shuffleAnswers": false,
+      "shuffleQuestionOrder": false
+    },
+    "sessionQuestions": [],
+    "currentQuestionIndex": -1,
+    "currentQuestionStartedAt": null,
+    "countdownStartedAt": null,
+    "createdAt": "2026-07-05T06:08:49.625Z",
+    "startedAt": null,
+    "finishedAt": null
+  }
+]

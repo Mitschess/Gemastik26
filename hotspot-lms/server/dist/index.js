@@ -15,6 +15,7 @@ const assignments_1 = __importDefault(require("./routes/assignments"));
 const courses_1 = __importDefault(require("./routes/courses"));
 const questionBank_1 = __importDefault(require("./routes/questionBank"));
 const library_1 = __importDefault(require("./routes/library"));
+const liveQuiz_1 = __importDefault(require("./routes/liveQuiz"));
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 5000;
 app.use((0, cors_1.default)());
@@ -28,6 +29,7 @@ app.use('/api/assignments', assignments_1.default);
 app.use('/api/courses', courses_1.default);
 app.use('/api/question-bank', questionBank_1.default);
 app.use('/api/library', library_1.default);
+app.use('/api/live-quiz', liveQuiz_1.default);
 // Error handler
 app.use((err, req, res, next) => {
     console.error('Server Error:', err);

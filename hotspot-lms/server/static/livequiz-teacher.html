@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Live Quiz | EduLAN</title>
+  <script>!function(){var t=localStorage.getItem('edulan_theme'),d=matchMedia('(prefers-color-scheme:dark)').matches;document.documentElement.setAttribute('data-theme',t||(d?'dark':'light'))}();</script>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body class="classroom-body">
+  <nav class="edw-navbar" aria-label="Navigasi guru">
+    <a href="/teacher.html" class="edw-navbar-brand">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+      EduLAN Classroom
+    </a>
+    <div class="edw-sub-nav">
+      <div class="edw-primary-nav">
+        <ul class="edw-nav-list">
+          <li class="edw-nav-item"><a href="/dashboard.html" class="edw-nav-link">Beranda</a></li>
+          <li class="edw-nav-item"><a href="/teacher.html" class="edw-nav-link">Panel Guru</a></li>
+          <li class="edw-nav-item"><a href="#" class="edw-nav-link active" onclick="return false">Live Quiz</a></li>
+        </ul>
+      </div>
+      <div class="edw-user-nav">
+        <span id="themeToggleSlot"></span>
+        <div class="edw-nav-divider"></div>
+        <div class="edw-user-menu">
+          <button class="edw-user-btn" onclick="toggleUserMenu()" aria-label="Menu pengguna">
+            <span class="edw-user-initials" id="navUserInitials">G</span>
+          </button>
+          <div class="edw-dropdown" id="userDropdown">
+            <div class="edw-dropdown-item" style="cursor:default;font-weight:600" id="navUserName">Guru</div>
+            <button class="edw-dropdown-item" onclick="logout()">🚪 Keluar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container" style="margin-top:calc(var(--navbar-height) + 24px);padding-bottom:80px">
+
+    <!-- ============ VIEW: LIST ============ -->
+    <section id="lq-view-list">
+      <div class="lq-hero">
+        <div>
+          <div class="badge badge-info mb-md">Live Quiz</div>
+          <h1>Kuis interaktif real-time</h1>
+          <p class="text-secondary mt-sm">Buat kuis pilihan ganda, undang murid untuk join, lalu mainkan secara langsung.</p>
+        </div>
+        <button class="btn btn-primary btn-lg" onclick="openCreateForm()">+ Buat Live Quiz</button>
+      </div>
+
+      <div id="createFormCard" class="card mt-lg hidden">
+        <h3>Live Quiz Baru</h3>
+        <form id="createQuizForm" class="flex flex-col gap-md mt-md" onsubmit="return false">
+          <div class="form-group">
+            <label for="newQuizTitle">Judul Live Quiz</label>
+            <input class="input" id="newQuizTitle" placeholder="Contoh: Kuis Jaringan Dasar" required />
+          </div>
+          <div class="flex gap-sm">
+            <button class="btn btn-primary" onclick="submitCreateQuiz()">Buat & Susun Soal</button>
+            <button class="btn btn-secondary" onclick="closeCreateForm()" type="button">Batal</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="section-header mt-lg">
+        <div><h2>Live Quiz Saya</h2><p class="text-sm text-secondary">Draft, waiting room, dan kuis yang sedang berjalan.</p></div>
+        <button class="btn btn-sm btn-secondary" onclick="refreshAll()">Refresh</button>
+      </div>
+      <div id="myQuizGrid" class="lq-quiz-grid"></div>
+
+      <div class="section-header mt-lg">
+        <div><h2>Riwayat</h2><p class="text-sm text-secondary">Live quiz yang sudah selesai. Bisa dilihat hasilnya atau dihapus.</p></div>
+      </div>
+      <div id="historyList"></div>
+    </section>
+
+    <!-- ============ VIEW: SETUP (draft) ============ -->
+    <section id="lq-view-setup" class="hidden">
+      <button class="btn btn-sm btn-secondary" onclick="backToList()">← Kembali</button>
+      <div class="lq-hero mt-md">
+        <div>
+          <span class="lq-status-badge lq-status-draft">Draft</span>
+          <h1 id="setupTitle" class="mt-sm">Menyusun Soal</h1>
+          <p class="text-secondary mt-sm">Tambahkan soal manual atau ambil dari bank soal. Klik "Selesai" jika sudah siap.</p>
+        </div>
+      </div>
+
+      <div class="card mt-lg">
+        <h3>Pengaturan Kuis</h3>
+        <p class="text-sm text-secondary mb-md">Bisa diubah lagi nanti di waiting room, sebelum kuis dimulai.</p>
+        <div class="lq-settings-grid">
+          <div><label class="text-xs font-bold">Waktu per soal (detik)</label><input type="number" min="5" class="input" id="setTimePerQ" onchange="saveSettings()" /></div>
+          <label class="toggle-row"><span><strong>Acak jawaban</strong><small>Urutan pilihan diacak per murid.</small></span><input type="checkbox" id="setShuffleAns" onchange="saveSettings()" /></label>
+          <label class="toggle-row"><span><strong>Acak urutan soal</strong><small>Urutan soal diacak saat mulai.</small></span><input type="checkbox" id="setShuffleOrder" onchange="saveSettings()" /></label>
+        </div>
+        <div class="mt-md">
+          <label class="text-xs font-bold">Mode Kuis</label>
+          <div class="lq-mode-options mt-sm">
+            <label class="lq-mode-option">
+              <input type="radio" name="setVisibility" value="public" onchange="saveSettings()" />
+              <span><strong>Publik</strong><small>Langsung muncul di dashboard semua murid, tinggal klik Join.</small></span>
+            </label>
+            <label class="lq-mode-option">
+              <input type="radio" name="setVisibility" value="private" onchange="saveSettings()" />
+              <span><strong>Privat</strong><small>Disembunyikan dari dashboard murid, murid wajib masukkan kode join.</small></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-header mt-lg">
+        <div><h2>Soal (<span id="questionCount">0</span>)</h2></div>
+        <div class="flex gap-sm wrap-row">
+          <button class="btn btn-secondary btn-sm" onclick="openBankModal()">Ambil dari Bank Soal</button>
+          <button class="btn btn-primary btn-sm" onclick="openQuestionForm()">+ Tambah Soal</button>
+        </div>
+      </div>
+
+      <div id="questionFormCard" class="card mb-md hidden">
+        <h3 id="questionFormTitle">Soal Pilihan Ganda Baru</h3>
+        <div class="flex flex-col gap-md mt-md">
+          <div><label class="text-xs font-bold">Pertanyaan</label><textarea class="textarea input" id="qfPrompt" rows="2" placeholder="Tulis pertanyaan..."></textarea></div>
+          <div>
+            <label class="text-xs font-bold">Pilihan Jawaban (pilih radio untuk kunci jawaban benar)</label>
+            <div id="qfChoices" class="flex flex-col gap-sm mt-sm"></div>
+            <button class="btn btn-sm btn-secondary mt-sm" onclick="qfAddChoice()" type="button">+ Tambah Pilihan</button>
+          </div>
+          <div style="max-width:160px"><label class="text-xs font-bold">Poin</label><input type="number" min="1" class="input" id="qfPoints" value="1" /></div>
+          <div class="flex gap-sm">
+            <button class="btn btn-primary" id="qfSubmitBtn" onclick="submitQuestionForm()">Simpan Soal</button>
+            <button class="btn btn-secondary" onclick="closeQuestionForm()" type="button">Batal</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="questionList" class="flex flex-col gap-md"></div>
+
+      <button class="btn btn-primary lq-fab" id="finishSetupBtn" onclick="finishSetup()">Selesai ✓</button>
+    </section>
+
+    <!-- ============ VIEW: WAITING ROOM ============ -->
+    <section id="lq-view-waiting" class="hidden">
+      <button class="btn btn-sm btn-secondary" onclick="backToList()">← Kembali</button>
+      <div class="lq-hero mt-md">
+        <div>
+          <span class="lq-status-badge lq-status-waiting">Waiting Room</span>
+          <h1 id="waitingTitle" class="mt-sm">Menunggu Murid Join</h1>
+          <p class="text-secondary mt-sm" id="waitingModeDesc">-</p>
+        </div>
+        <button class="btn btn-primary btn-lg" id="startQuizBtn" onclick="startQuiz()">Mulai Quiz</button>
+      </div>
+
+      <div class="lq-code-box mt-md">
+        <span class="lq-code-label">Kode Join</span>
+        <span class="lq-code-value" id="waitingCode">-</span>
+      </div>
+
+      <div class="card mt-lg">
+        <h3>Pengaturan Kuis</h3>
+        <div class="lq-settings-grid">
+          <div><label class="text-xs font-bold">Waktu per soal (detik)</label><input type="number" min="5" class="input" id="wSetTimePerQ" onchange="saveSettings()" /></div>
+          <label class="toggle-row"><span><strong>Acak jawaban</strong><small>Urutan pilihan diacak per murid.</small></span><input type="checkbox" id="wSetShuffleAns" onchange="saveSettings()" /></label>
+          <label class="toggle-row"><span><strong>Acak urutan soal</strong><small>Urutan soal diacak saat mulai.</small></span><input type="checkbox" id="wSetShuffleOrder" onchange="saveSettings()" /></label>
+        </div>
+        <div class="mt-md">
+          <label class="text-xs font-bold">Mode Kuis</label>
+          <div class="lq-mode-options mt-sm">
+            <label class="lq-mode-option">
+              <input type="radio" name="wSetVisibility" value="public" onchange="saveSettings()" />
+              <span><strong>Publik</strong><small>Langsung muncul di dashboard semua murid, tinggal klik Join.</small></span>
+            </label>
+            <label class="lq-mode-option">
+              <input type="radio" name="wSetVisibility" value="private" onchange="saveSettings()" />
+              <span><strong>Privat</strong><small>Disembunyikan dari dashboard murid, murid wajib masukkan kode join.</small></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mt-lg">
+        <h3>Murid Bergabung (<span id="participantCount">0</span>)</h3>
+        <div id="participantList" class="lq-waiting-list"></div>
+      </div>
+    </section>
+
+    <!-- ============ VIEW: LIVE DASHBOARD ============ -->
+    <section id="lq-view-live" class="hidden">
+      <div class="lq-progress-header">
+        <div>
+          <span class="lq-status-badge lq-status-active">Sedang Berlangsung</span>
+          <h1 id="liveTitle" class="mt-sm">Live Quiz</h1>
+        </div>
+        <div class="text-right">
+          <div class="text-sm text-secondary">Total soal: <strong id="liveQTotal">-</strong></div>
+          <div class="text-sm text-secondary">Murid selesai: <strong id="liveFinishedCount">0</strong> / <span id="liveStudentsTotal">0</span></div>
+        </div>
+      </div>
+      <p class="text-xs text-muted mt-sm">Tiap murid mengerjakan dengan kecepatannya sendiri — begitu menjawab, mereka langsung lanjut ke soal berikutnya tanpa menunggu murid lain.</p>
+      <div id="liveProgressList" class="lq-progress-list mt-md"></div>
+    </section>
+
+    <!-- ============ VIEW: RESULTS ============ -->
+    <section id="lq-view-results" class="hidden">
+      <button class="btn btn-sm btn-secondary" onclick="backToList()">← Kembali ke Daftar</button>
+      <div class="lq-hero mt-md">
+        <div>
+          <span class="lq-status-badge lq-status-finished">Selesai</span>
+          <h1 id="resultsTitle" class="mt-sm">Hasil Live Quiz</h1>
+          <p class="text-secondary mt-sm">Klik nama murid untuk melihat review jawaban.</p>
+        </div>
+      </div>
+      <div id="resultsLeaderboard" class="mt-lg"></div>
+    </section>
+
+  </main>
+
+  <!-- Bank soal modal -->
+  <div class="modal-overlay" id="bankModal">
+    <div class="modal" style="max-width:560px">
+      <div class="modal-header"><h3>Ambil dari Bank Soal (Pilihan Ganda)</h3><button class="icon-btn" onclick="closeModal('bankModal')">✕</button></div>
+      <p class="text-sm text-secondary mt-sm">Pilih satu atau lebih soal. Hanya tipe pilihan ganda yang bisa dipakai untuk Live Quiz.</p>
+      <div id="bankModalList" class="lq-bank-modal-list mt-md"></div>
+      <button class="btn btn-primary w-full mt-md" onclick="submitBankSelection()">Tambahkan Terpilih</button>
+    </div>
+  </div>
+
+  <!-- Review modal -->
+  <div class="modal-overlay" id="reviewModal">
+    <div class="modal" style="max-width:640px">
+      <div class="modal-header"><h3 id="reviewModalTitle">Review Jawaban</h3><button class="icon-btn" onclick="closeModal('reviewModal')">✕</button></div>
+      <div id="reviewModalBody" class="mt-md"></div>
+    </div>
+  </div>
+
+  <!-- Countdown overlay -->
+  <div class="lq-countdown-overlay hidden" id="countdownOverlay">
+    <div>Kuis akan dimulai dalam</div>
+    <div class="lq-countdown-number" id="countdownNumber">3</div>
+  </div>
+
+  <script src="/app.js"></script>
+  <script>
+    const currentUser = requireAuth('teacher');
+    let activeQuizId = null;
+    let activeQuiz = null;
+    let bankItems = [];
+    let bankSelected = new Set();
+    let qfChoiceCount = 0;
+    let pollHandle = null;
+    let editingQuestionId = null;
+
+    function api(url, opts) {
+      return fetch(url, opts).then(async r => {
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(data.error || 'Gagal memproses permintaan');
+        return data;
+      });
+    }
+
+    function stopPolling() { if (pollHandle) { clearInterval(pollHandle); pollHandle = null; } }
+
+    function hideAllViews() {
+      ['list','setup','waiting','live','results'].forEach(v => document.getElementById('lq-view-' + v).classList.add('hidden'));
+      document.getElementById('countdownOverlay').classList.add('hidden');
+    }
+
+    function backToList() {
+      stopPolling();
+      activeQuizId = null;
+      hideAllViews();
+      document.getElementById('lq-view-list').classList.remove('hidden');
+      refreshAll();
+    }
+
+    async function refreshAll() {
+      try {
+        const [mine, history] = await Promise.all([
+          api(`/api/live-quiz?teacherId=${encodeURIComponent(currentUser.id)}`),
+          api(`/api/live-quiz?history=true&teacherId=${encodeURIComponent(currentUser.id)}`)
+        ]);
+        renderMyQuizzes(mine.filter(q => q.status !== 'finished'));
+        renderHistory(history);
+      } catch {
+        showToast('Gagal memuat data live quiz.', 'error');
+      }
+    }
+
+    function statusLabel(s) {
+      return { draft: 'Draft', waiting: 'Waiting Room', countdown: 'Bersiap...', active: 'Berlangsung', finished: 'Selesai' }[s] || s;
+    }
+
+    function renderMyQuizzes(list) {
+      document.getElementById('myQuizGrid').innerHTML = list.length ? list.map(q => `
+        <div class="lq-quiz-card">
+          <div class="flex justify-between items-start gap-sm">
+            <h3>${escapeHtml(q.title)}</h3>
+            <span class="lq-status-badge lq-status-${q.status}">${statusLabel(q.status)}</span>
+          </div>
+          <div class="flex items-center gap-sm">
+            <span class="lq-visibility-badge lq-visibility-${q.visibility || 'public'}">${q.visibility === 'private' ? '🔒 Privat' : '🌐 Publik'}</span>
+          </div>
+          <div class="text-sm text-secondary">${q.totalQuestions} soal</div>
+          <div class="lq-quiz-card-footer">
+            <span class="text-xs text-muted">${formatDate(q.createdAt)}</span>
+            <button class="btn btn-sm btn-primary" onclick="openQuiz('${q.id}')">${q.status === 'draft' ? 'Lanjutkan Setup' : q.status === 'waiting' ? 'Buka Waiting Room' : 'Buka Dashboard'}</button>
+          </div>
+        </div>
+      `).join('') : '<div class="empty-state"><div class="empty-state-icon">🎮</div><p>Belum ada live quiz. Klik "+ Buat Live Quiz" untuk mulai.</p></div>';
+    }
+
+    function renderHistory(list) {
+      document.getElementById('historyList').innerHTML = list.length ? list.map(q => `
+        <div class="lq-history-row">
+          <div>
+            <strong>${escapeHtml(q.title)}</strong>
+            <div class="text-xs text-muted">${q.totalQuestions} soal · selesai ${formatDate(q.finishedAt)}</div>
+          </div>
+          <div class="flex gap-sm">
+            <button class="btn btn-sm btn-secondary" onclick="viewResults('${q.id}')">Lihat Hasil</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteQuiz('${q.id}')">Hapus</button>
+          </div>
+        </div>
+      `).join('') : '<div class="empty-state"><p>Belum ada riwayat live quiz.</p></div>';
+    }
+
+    async function deleteQuiz(id) {
+      if (!confirm('Hapus live quiz ini beserta riwayatnya? Tindakan ini tidak bisa dibatalkan.')) return;
+      await api(`/api/live-quiz/${id}`, { method: 'DELETE' });
+      showToast('Live quiz dihapus', 'success');
+      refreshAll();
+    }
+
+    function openCreateForm() { document.getElementById('createFormCard').classList.remove('hidden'); document.getElementById('newQuizTitle').focus(); }
+    function closeCreateForm() { document.getElementById('createFormCard').classList.add('hidden'); document.getElementById('newQuizTitle').value = ''; }
+
+    async function submitCreateQuiz() {
+      const title = document.getElementById('newQuizTitle').value.trim();
+      if (!title) return showToast('Judul wajib diisi', 'error');
+      try {
+        const quiz = await api('/api/live-quiz', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ teacherId: currentUser.id, teacherName: currentUser.name || currentUser.username, title })
+        });
+        closeCreateForm();
+        openQuiz(quiz.id);
+      } catch (e) { showToast(e.message, 'error'); }
+    }
+
+    async function openQuiz(id) {
+      activeQuizId = id;
+      const quiz = await api(`/api/live-quiz/${id}?role=teacher`);
+      activeQuiz = quiz;
+      if (quiz.status === 'draft') renderSetupView(quiz);
+      else if (quiz.status === 'waiting') renderWaitingView(quiz);
+      else if (quiz.status === 'countdown' || quiz.status === 'active') startLivePolling(quiz);
+      else viewResults(quiz.id);
+    }
+
+    /* ---------- SETUP (draft) ---------- */
+
+    function renderSetupView(quiz) {
+      stopPolling();
+      hideAllViews();
+      document.getElementById('lq-view-setup').classList.remove('hidden');
+      document.getElementById('setupTitle').textContent = quiz.title;
+      document.getElementById('setTimePerQ').value = quiz.settings.timePerQuestionSec;
+      document.getElementById('setShuffleAns').checked = quiz.settings.shuffleAnswers;
+      document.getElementById('setShuffleOrder').checked = quiz.settings.shuffleQuestionOrder;
+      const setVis = document.querySelector(`input[name="setVisibility"][value="${quiz.visibility || 'public'}"]`);
+      if (setVis) setVis.checked = true;
+      renderQuestionList(quiz);
+      closeQuestionForm();
+    }
+
+    function renderQuestionList(quiz) {
+      document.getElementById('questionCount').textContent = quiz.questions.length;
+      document.getElementById('questionList').innerHTML = quiz.questions.length ? quiz.questions.map((q, idx) => `
+        <div class="lq-question-card">
+          <div class="lq-question-card-head">
+            <strong>${idx + 1}. ${escapeHtml(q.prompt)}</strong>
+            <div class="flex gap-sm">
+              <button class="btn btn-sm btn-secondary" onclick="editQuestion('${q.id}')">Edit</button>
+              <button class="btn btn-sm btn-danger" onclick="deleteQuestion('${q.id}')">Hapus</button>
+            </div>
+          </div>
+          <div class="flex flex-col gap-xs">
+            ${q.choices.map((c, ci) => `<div class="text-sm ${ci === q.correctIndex ? 'text-secondary' : ''}" style="${ci === q.correctIndex ? 'color:var(--success);font-weight:700' : ''}">${String.fromCharCode(65 + ci)}. ${escapeHtml(c)} ${ci === q.correctIndex ? '✓' : ''}</div>`).join('')}
+          </div>
+        </div>
+      `).join('') : '<div class="empty-state"><p>Belum ada soal ditambahkan.</p></div>';
+    }
+
+    async function saveSettings() {
+      if (!activeQuizId) return;
+      const inDraft = !document.getElementById('lq-view-setup').classList.contains('hidden');
+      const timeId = inDraft ? 'setTimePerQ' : 'wSetTimePerQ';
+      const ansId = inDraft ? 'setShuffleAns' : 'wSetShuffleAns';
+      const ordId = inDraft ? 'setShuffleOrder' : 'wSetShuffleOrder';
+      const visName = inDraft ? 'setVisibility' : 'wSetVisibility';
+      const visChecked = document.querySelector(`input[name="${visName}"]:checked`);
+      try {
+        const updated = await api(`/api/live-quiz/${activeQuizId}/settings`, {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            timePerQuestionSec: Number(document.getElementById(timeId).value || 20),
+            shuffleAnswers: document.getElementById(ansId).checked,
+            shuffleQuestionOrder: document.getElementById(ordId).checked,
+            visibility: visChecked ? visChecked.value : undefined
+          })
+        });
+        activeQuiz = updated;
+        if (!inDraft) {
+          document.getElementById('waitingModeDesc').textContent = updated.visibility === 'private'
+            ? 'Mode privat: kuis ini tidak muncul di dashboard murid. Bagikan kode join di bawah supaya murid bisa masuk.'
+            : 'Mode publik: kuis ini sudah otomatis muncul di dashboard semua murid. Kode join di bawah bisa dipakai sebagai alternatif.';
+        }
+        showToast('Pengaturan disimpan', 'success');
+      } catch (e) { showToast(e.message, 'error'); }
+    }
+
+    function openQuestionForm() {
+      editingQuestionId = null;
+      document.getElementById('questionFormTitle').textContent = 'Soal Pilihan Ganda Baru';
+      document.getElementById('qfSubmitBtn').textContent = 'Simpan Soal';
+      document.getElementById('questionFormCard').classList.remove('hidden');
+      document.getElementById('qfPrompt').value = '';
+      document.getElementById('qfPoints').value = '1';
+      document.getElementById('qfChoices').innerHTML = '';
+      qfChoiceCount = 0;
+      qfAddChoice(); qfAddChoice();
+      document.getElementById('qfPrompt').focus();
+    }
+
+    function editQuestion(qId) {
+      const q = activeQuiz.questions.find(item => item.id === qId);
+      if (!q) return showToast('Soal tidak ditemukan', 'error');
+
+      editingQuestionId = qId;
+      document.getElementById('questionFormTitle').textContent = 'Edit Soal';
+      document.getElementById('qfSubmitBtn').textContent = 'Simpan Perubahan';
+      document.getElementById('questionFormCard').classList.remove('hidden');
+
+      document.getElementById('qfPrompt').value = q.prompt;
+      document.getElementById('qfPoints').value = q.points || 1;
+      document.getElementById('qfChoices').innerHTML = '';
+      qfChoiceCount = 0;
+      q.choices.forEach((choiceText, ci) => {
+        qfAddChoice();
+        const row = document.querySelector(`#qfChoices [data-choice-row="${qfChoiceCount}"]`);
+        row.querySelector('.qf-choice-text').value = choiceText;
+        if (ci === q.correctIndex) row.querySelector('input[type="radio"]').checked = true;
+      });
+
+      document.getElementById('questionFormCard').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      document.getElementById('qfPrompt').focus();
+    }
+
+    function closeQuestionForm() {
+      editingQuestionId = null;
+      document.getElementById('questionFormCard').classList.add('hidden');
+    }
+
+    function qfAddChoice() {
+      qfChoiceCount++;
+      const idx = qfChoiceCount;
+      const row = document.createElement('div');
+      row.className = 'lq-choice-edit-row';
+      row.dataset.choiceRow = idx;
+      row.innerHTML = `<input type="radio" name="qfCorrect" value="${idx}" ${idx === 1 ? 'checked' : ''} />
+        <input class="input qf-choice-text" placeholder="Pilihan jawaban" />
+        <button class="btn btn-sm btn-secondary" type="button" onclick="qfRemoveChoice(${idx})">✕</button>`;
+      document.getElementById('qfChoices').appendChild(row);
+    }
+    function qfRemoveChoice(idx) {
+      const rows = document.querySelectorAll('#qfChoices [data-choice-row]');
+      if (rows.length <= 2) return showToast('Minimal 2 pilihan jawaban', 'warning');
+      document.querySelector(`#qfChoices [data-choice-row="${idx}"]`)?.remove();
+    }
+
+    async function submitQuestionForm() {
+      const prompt = document.getElementById('qfPrompt').value.trim();
+      const rows = Array.from(document.querySelectorAll('#qfChoices [data-choice-row]'));
+      const choices = rows.map(r => r.querySelector('.qf-choice-text').value.trim());
+      const checkedRadio = document.querySelector('input[name="qfCorrect"]:checked');
+      const correctRowIdx = checkedRadio ? Number(checkedRadio.value) : null;
+      const correctIndex = rows.findIndex(r => Number(r.dataset.choiceRow) === correctRowIdx);
+      const points = Number(document.getElementById('qfPoints').value || 1);
+
+      if (!prompt) return showToast('Pertanyaan wajib diisi', 'error');
+      if (choices.some(c => !c)) return showToast('Semua pilihan jawaban wajib diisi', 'error');
+      if (correctIndex < 0) return showToast('Pilih kunci jawaban yang benar', 'error');
+
+      try {
+        if (editingQuestionId) {
+          activeQuiz = await api(`/api/live-quiz/${activeQuizId}/questions/${editingQuestionId}`, {
+            method: 'PUT', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt, choices, correctIndex, points })
+          });
+          closeQuestionForm();
+          renderQuestionList(activeQuiz);
+          showToast('Soal berhasil diperbarui', 'success');
+        } else {
+          activeQuiz = await api(`/api/live-quiz/${activeQuizId}/questions`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt, choices, correctIndex, points })
+          });
+          closeQuestionForm();
+          renderQuestionList(activeQuiz);
+          showToast('Soal ditambahkan', 'success');
+        }
+      } catch (e) { showToast(e.message, 'error'); }
+    }
+
+    async function deleteQuestion(qId) {
+      if (!confirm('Hapus soal ini?')) return;
+      activeQuiz = await api(`/api/live-quiz/${activeQuizId}/questions/${qId}`, { method: 'DELETE' });
+      renderQuestionList(activeQuiz);
+    }
+
+    /* ---------- BANK SOAL MODAL ---------- */
+
+    async function openBankModal() {
+      bankSelected = new Set();
+      try {
+        const all = await api('/api/question-bank');
+        bankItems = all.filter(item => item.type === 'mcq');
+      } catch { bankItems = []; }
+      renderBankModalList();
+      document.getElementById('bankModal').classList.add('show');
+    }
+
+    function renderBankModalList() {
+      document.getElementById('bankModalList').innerHTML = bankItems.length ? bankItems.map(item => `
+        <label class="lq-bank-item ${bankSelected.has(item.id) ? 'selected' : ''}" onclick="toggleBankSelect(event, '${item.id}')">
+          <input type="checkbox" ${bankSelected.has(item.id) ? 'checked' : ''} readonly />
+          <div>
+            <div class="font-bold text-sm">${escapeHtml(item.prompt)}</div>
+            <div class="text-xs text-muted">${escapeHtml(item.category || 'Umum')} · ${(item.choices || []).length} pilihan</div>
+          </div>
+        </label>
+      `).join('') : '<div class="empty-state"><p>Tidak ada soal pilihan ganda di bank soal.</p></div>';
+    }
+
+    function toggleBankSelect(e, id) {
+      e.preventDefault();
+      if (bankSelected.has(id)) bankSelected.delete(id); else bankSelected.add(id);
+      renderBankModalList();
+    }
+
+    async function submitBankSelection() {
+      if (!bankSelected.size) return showToast('Pilih minimal satu soal', 'warning');
+      try {
+        activeQuiz = await api(`/api/live-quiz/${activeQuizId}/questions/from-bank`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ bankIds: Array.from(bankSelected) })
+        });
+        closeModal('bankModal');
+        renderQuestionList(activeQuiz);
+        showToast('Soal dari bank berhasil ditambahkan', 'success');
+      } catch (e) { showToast(e.message, 'error'); }
+    }
+
+    async function finishSetup() {
+      try {
+        activeQuiz = await api(`/api/live-quiz/${activeQuizId}/finish-setup`, { method: 'POST' });
+        renderWaitingView(activeQuiz);
+      } catch (e) { showToast(e.message, 'error'); }
+    }
+
+    /* ---------- WAITING ROOM ---------- */
+
+    function renderWaitingView(quiz) {
+      stopPolling();
+      hideAllViews();
+      document.getElementById('lq-view-waiting').classList.remove('hidden');
+      document.getElementById('waitingTitle').textContent = quiz.title;
+      document.getElementById('waitingCode').textContent = quiz.code || '-';
+      document.getElementById('wSetTimePerQ').value = quiz.settings.timePerQuestionSec;
+      document.getElementById('wSetShuffleAns').checked = quiz.settings.shuffleAnswers;
+      document.getElementById('wSetShuffleOrder').checked = quiz.settings.shuffleQuestionOrder;
+      const wSetVis = document.querySelector(`input[name="wSetVisibility"][value="${quiz.visibility || 'public'}"]`);
+      if (wSetVis) wSetVis.checked = true;
+      document.getElementById('waitingModeDesc').textContent = quiz.visibility === 'private'
+        ? 'Mode privat: kuis ini tidak muncul di dashboard murid. Bagikan kode join di bawah supaya murid bisa masuk.'
+        : 'Mode publik: kuis ini sudah otomatis muncul di dashboard semua murid. Kode join di bawah bisa dipakai sebagai alternatif.';
+      refreshParticipants();
+      pollHandle = setInterval(refreshParticipants, 2000);
+    }
+
+    async function refreshParticipants() {
+      try {
+        const list = await api(`/api/live-quiz/${activeQuizId}/participants`);
+        document.getElementById('participantCount').textContent = list.length;
+        document.getElementById('participantList').innerHTML = list.length ? list.map(p => `
+          <div class="lq-waiting-chip"><span class="lq-dot"></span>${escapeHtml(p.studentName)}</div>
+        `).join('') : '<p class="text-sm text-muted">Belum ada murid yang join.</p>';
+      } catch { /* silent, keep polling */ }
+    }
+
+    async function startQuiz() {
+      try {
+        await api(`/api/live-quiz/${activeQuizId}/start`, { method: 'POST' });
+        const quiz = await api(`/api/live-quiz/${activeQuizId}?role=teacher`);
+        startLivePolling(quiz);
+      } catch (e) { showToast(e.message, 'error'); }
+    }
+
+    /* ---------- LIVE DASHBOARD ---------- */
+
+    function startLivePolling(quiz) {
+      stopPolling();
+      hideAllViews();
+      document.getElementById('lq-view-live').classList.remove('hidden');
+      document.getElementById('liveTitle').textContent = quiz.title;
+      pollLiveProgress();
+      pollHandle = setInterval(pollLiveProgress, 1200);
+    }
+
+    async function pollLiveProgress() {
+      try {
+        const p = await api(`/api/live-quiz/${activeQuizId}/progress`);
+        if (p.status === 'finished') { viewResults(activeQuizId); return; }
+
+        const overlay = document.getElementById('countdownOverlay');
+        if (p.status === 'countdown') {
+          overlay.classList.remove('hidden');
+          document.getElementById('countdownNumber').textContent = p.timeLeftSec;
+        } else {
+          overlay.classList.add('hidden');
+        }
+
+        document.getElementById('liveQTotal').textContent = p.totalQuestions;
+        document.getElementById('liveFinishedCount').textContent = p.studentsFinishedCount ?? 0;
+        document.getElementById('liveStudentsTotal').textContent = p.studentsTotal ?? p.students.length;
+
+        document.getElementById('liveProgressList').innerHTML = p.students.length ? p.students.map((s, idx) => {
+          const total = p.totalQuestions || 0;
+          const correctPct = total ? Math.round((s.correctCount / total) * 100) : 0;
+          const wrongPct = total ? Math.round((s.wrongCount / total) * 100) : 0;
+          return `
+          <div class="lq-progress-row ${s.isTopThree ? 'lq-top3' : ''}">
+            <div class="lq-progress-name">${s.isTopThree ? ['🥇','🥈','🥉'][idx] || '🏅' : ''} ${escapeHtml(s.studentName)}${s.finished ? ' <span class="badge badge-info" style="font-size:0.625rem">Selesai</span>' : ''}</div>
+            <div class="lq-progress-track">
+              <div class="lq-progress-fill-correct" style="width:${correctPct}%"></div>
+              <div class="lq-progress-fill-wrong" style="width:${wrongPct}%"></div>
+            </div>
+            <div class="lq-progress-stats"><span class="lq-stat-correct">Benar ${s.correctCount}</span><span class="lq-stat-wrong">Salah ${s.wrongCount}</span></div>
+          </div>
+        `;
+        }).join('') : '<div class="empty-state"><p>Belum ada murid yang mengerjakan.</p></div>';
+      } catch { /* silent, keep polling */ }
+    }
+
+    /* ---------- RESULTS ---------- */
+
+    async function viewResults(id) {
+      activeQuizId = id;
+      stopPolling();
+      hideAllViews();
+      document.getElementById('lq-view-results').classList.remove('hidden');
+      try {
+        const r = await api(`/api/live-quiz/${id}/results`);
+        document.getElementById('resultsTitle').textContent = r.title;
+        document.getElementById('resultsLeaderboard').innerHTML = r.leaderboard.length ? r.leaderboard.map(p => `
+          <div class="lq-leaderboard-row ${p.isTopThree ? 'lq-top3' : ''}" onclick="openReview('${p.studentId}','${escapeHtml(p.studentName)}')">
+            <div class="lq-leaderboard-rank">${p.rank}</div>
+            <div class="lq-leaderboard-name">${escapeHtml(p.studentName)}</div>
+            <div class="lq-progress-stats"><span class="lq-stat-correct">Benar ${p.correctCount}</span><span class="lq-stat-wrong">Salah ${p.wrongCount}</span></div>
+          </div>
+        `).join('') : '<div class="empty-state"><p>Tidak ada peserta di quiz ini.</p></div>';
+      } catch (e) { showToast(e.message, 'error'); }
+    }
+
+    async function openReview(studentId, studentName) {
+      try {
+        const r = await api(`/api/live-quiz/${activeQuizId}/review/${studentId}`);
+        document.getElementById('reviewModalTitle').textContent = `Review — ${r.studentName || studentName}`;
+        document.getElementById('reviewModalBody').innerHTML = r.review.map((q, idx) => `
+          <div class="lq-review-item">
+            <strong>${idx + 1}. ${escapeHtml(q.prompt)}</strong>
+            <div class="mt-sm">
+              ${q.choices.map((c, ci) => `<div class="lq-review-choice ${ci === q.correctIndex ? 'lq-correct' : (ci === q.studentChoiceIndex ? 'lq-wrong-pick' : '')}">${String.fromCharCode(65 + ci)}. ${escapeHtml(c)}${ci === q.correctIndex ? ' ✓ Kunci' : ''}${ci === q.studentChoiceIndex && ci !== q.correctIndex ? ' ✕ Jawaban murid' : ''}</div>`).join('')}
+            </div>
+            ${q.studentChoiceIndex === null ? '<div class="text-xs text-muted mt-sm">Murid tidak menjawab soal ini (timeout).</div>' : ''}
+          </div>
+        `).join('');
+        document.getElementById('reviewModal').classList.add('show');
+      } catch (e) { showToast(e.message, 'error'); }
+    }
+
+    function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+    if (currentUser) {
+      const name = currentUser.name || currentUser.username;
+      document.getElementById('navUserName').textContent = name;
+      const navInit = document.getElementById('navUserInitials');
+      if (navInit) navInit.textContent = getInitials(name);
+      initThemeToggle(document.getElementById('themeToggleSlot'));
+      refreshAll();
+      pollHandle = setInterval(() => {
+        if (document.getElementById('lq-view-list').classList.contains('hidden')) return;
+        refreshAll();
+      }, 4000);
+    }
+  </script>
+</body>
+</html>

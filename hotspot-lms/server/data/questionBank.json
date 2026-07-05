@@ -1,1 +1,28 @@
-[]
+[
+  {
+    "id": "1783176876121",
+    "type": "mcq",
+    "prompt": "2+2=?",
+    "choices": [
+      "3",
+      "4",
+      "5"
+    ],
+    "answer": "4",
+    "points": 1,
+    "category": "Matematika",
+    "difficulty": "medium",
+    "createdAt": "2026-07-04T14:54:36.121Z"
+  },
+  {
+    "id": "1783176876167",
+    "type": "essay",
+    "prompt": "Jelaskan OSI Layer",
+    "choices": [],
+    "answer": "...",
+    "points": 1,
+    "category": "Umum",
+    "difficulty": "medium",
+    "createdAt": "2026-07-04T14:54:36.167Z"
+  }
+]
