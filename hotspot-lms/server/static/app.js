@@ -306,3 +306,20 @@ function initClassroomShell(options = {}) {
 
   hidePageLoaderFull();
 }
+
+function bukaSimulasiLab(urlSimulasi) {
+  // 1. Pindahkan view siswa ke halaman laboratorium
+  if (typeof showView === 'function') {
+    showView('laboratorium');
+  }
+  
+  const frame = document.getElementById('labFrame');
+  const placeholder = document.getElementById('labPlaceholder');
+  
+  if (frame && placeholder) {
+    // 2. Isi source iframe ke arah folder statis /public
+    frame.src = '/' + urlSimulasi;
+    frame.style.display = 'block';
+    placeholder.style.display = 'none';
+  }
+}

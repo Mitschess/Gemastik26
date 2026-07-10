@@ -7,5 +7,14 @@
     "teacherName": "Fakhry",
     "archived": false,
     "createdAt": "2026-07-03T06:54:14.349Z"
+  },
+  {
+    "id": "1783700290003",
+    "title": "Informatika kelas 12",
+    "description": "我们一起学猫叫",
+    "code": "INF-B-11",
+    "teacherName": "Kamu",
+    "archived": false,
+    "createdAt": "2026-07-10T16:18:10.003Z"
   }
 ]

@@ -80,5 +80,28 @@
     "totalAutoQuestions": 2,
     "earnedPoints": 1,
     "totalPoints": 2
+  },
+  {
+    "id": "ff8bc2f7-3cdb-4ba7-9231-add3281bcb5a",
+    "studentId": "1",
+    "studentName": "murid1",
+    "assignmentId": "1783128986259",
+    "courseId": "1783061654349",
+    "content": "aaaaaaa",
+    "answers": [
+      {
+        "questionId": "1783128986258",
+        "answer": "a"
+      }
+    ],
+    "submittedAt": "2026-07-10T17:52:03.581Z",
+    "grade": 0,
+    "feedback": "Auto check: 0 dari 1 jawaban sesuai kunci.",
+    "gradedAt": "2026-07-10T17:52:03.581Z",
+    "autoChecked": true,
+    "correctCount": 0,
+    "totalAutoQuestions": 1,
+    "earnedPoints": 0,
+    "totalPoints": 1
   }
 ]

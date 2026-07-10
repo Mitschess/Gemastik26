@@ -28,5 +28,20 @@
     "qIndex": -1,
     "qStartedAt": null,
     "rankingScore": 0
+  },
+  {
+    "id": "c51e3df4-c49f-4ce8-923d-e8f9fb867dd4",
+    "liveQuizId": "8d98a25d-f97d-448f-8562-91b244f5390e",
+    "studentId": "1",
+    "studentName": "murid1",
+    "joinedAt": "2026-07-10T17:38:07.128Z",
+    "answers": [],
+    "correctCount": 0,
+    "wrongCount": 0,
+    "finished": false,
+    "finishedAt": null,
+    "qIndex": -1,
+    "qStartedAt": null,
+    "rankingScore": 0
   }
 ]

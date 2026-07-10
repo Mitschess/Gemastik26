@@ -1986,4 +1986,66 @@ input[type="radio"]:checked::before { transform: scale(1); }
   .meet-video-grid { grid-template-columns: 1fr; }
 }
 
+/* ── Modern Course page header ── */
+/* ===== Modern Hero Override ===== */
 
+.edw-course-hero.modern-hero{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:40px 60px;
+    min-height:220px;
+}
+
+.edw-course-hero.modern-hero .hero-left{
+    width:65%;
+}
+
+.edw-course-hero.modern-hero .hero-right{
+    width:35%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:120px;
+    opacity:.2;
+}
+
+.edw-course-hero.modern-hero h1,
+.edw-course-hero.modern-hero p,
+.edw-course-hero.modern-hero span,
+.edw-course-hero.modern-hero small,
+.edw-course-hero.modern-hero strong{
+    color:#fff !important;
+}
+
+.edw-course-hero.modern-hero .hero-tag{
+    background:rgba(255,255,255,.18);
+    padding:8px 18px;
+    border-radius:999px;
+}
+
+.edw-course-hero.modern-hero .hero-stats{
+    display:flex;
+    gap:16px;
+    margin-top:24px;
+}
+
+.edw-course-hero.modern-hero .hero-stat{
+    background:rgba(255,255,255,.12);
+    padding:16px;
+    border-radius:16px;
+    text-align:center;
+    min-width:90px;
+}
+
+@keyframes floatAnim {
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(5deg);
+  }
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+}

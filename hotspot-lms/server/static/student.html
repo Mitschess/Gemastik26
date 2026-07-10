@@ -24,7 +24,8 @@
           <li class="edw-nav-item"><a href="#" class="edw-nav-link active" data-nav="dashboard" onclick="showView('dashboard');return false">Dashboard</a></li>
           <li class="edw-nav-item"><a href="#" class="edw-nav-link" data-nav="courses" onclick="showView('courses');return false">Kelas Saya</a></li>
           <li class="edw-nav-item"><a href="/livequiz-student.html" class="edw-nav-link" data-nav="livequiz">Live Quiz</a></li>
-          <li class="edw-nav-item"><a href="/meet.html" class="edw-nav-link">📹 Meet</a></li>
+          <li class="edw-nav-item"><a href="#" class="edw-nav-link" data-nav="laboratorium" onclick="showView('laboratorium'); return false;"><span class="nav-icon">🧪</span> Laboratorium</a></li>
+          <!-- <li class="edw-nav-item"><a href="/meet.html" class="edw-nav-link">📹 Meet</a></li> -->
         </ul>
       </div>
       <div class="edw-user-nav">
@@ -69,12 +70,17 @@
       <button class="edw-drawer-close" onclick="toggleDrawer('left')">✕</button>
     </div>
     <div class="edw-drawer-content">
-      <nav class="edw-drawer-list">
+        <nav class="edw-drawer-list">
         <a href="/dashboard.html" class="edw-drawer-item">Beranda</a>
         <a href="#" class="edw-drawer-item active" data-nav="dashboard" onclick="showView('dashboard');return false">Dashboard</a>
         <a href="#" class="edw-drawer-item" data-nav="courses" onclick="showView('courses');return false">Kelas Saya</a>
         <a href="/livequiz-student.html" class="edw-drawer-item" data-nav="livequiz">Live Quiz</a>
+        
+        <!-- Tambahkan baris Laboratorium di bawah ini -->
+        <a href="#" class="edw-drawer-item" data-nav="laboratorium" onclick="showView('laboratorium');return false">Laboratorium</a>
+        
         <a href="#" class="edw-drawer-item" id="drawerRecentToggle" onclick="this.nextElementSibling.classList.toggle('hidden');return false">Terbaru ▾</a>
+        
         <div class="edw-drawer-sub hidden" id="drawerRecentList"></div>
       </nav>
     </div>
@@ -101,14 +107,45 @@
         </div>
         <header class="edw-page-header"><h1>Dashboard</h1></header>
 
-        <section class="edw-slider">
-          <div class="edw-slider-content">
-            <div>
-              <h2>Selamat belajar di EduLAN</h2>
-              <p id="sliderSubtitle">Akses materi, kumpulkan tugas, dan pantau jadwal — semua via jaringan lokal sekolah.</p>
-            </div>
+        <!-- Banner Selamat Belajar Playful -->
+        <div class="edw-hero-banner" style="background: linear-gradient(135deg, #4338ca, #3b82f6); border-radius: 24px; padding: 32px; position: relative; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(59,130,246,0.3); margin: 16px 0 24px 0; display: flex; justify-content: space-between; align-items: center;">
+          
+          <div style="position: absolute; width: 150px; height: 150px; background: rgba(255,255,255,0.1); border-radius: 50%; top: -50px; right: 10%; pointer-events: none;"></div>
+          <div style="position: absolute; width: 250px; height: 250px; background: rgba(255,255,255,0.05); border-radius: 50%; bottom: -100px; left: -50px; pointer-events: none;"></div>
+
+          <div style="position: relative; z-index: 2; max-width: 70%;">
+            <h1 style="color: #ffffff; font-size: 2rem; font-weight: 800; margin: 0 0 8px 0; letter-spacing: -0.5px; display: flex; align-items: center; gap: 8px;">
+              Selamat belajar di EduLAN! 👋
+            </h1>
+            <p style="color: #e0f2fe; font-size: 1rem; margin: 0; font-weight: 500; opacity: 0.95;" id="sliderSubtitle">
+              Akses materi, kumpulkan tugas, dan pantau jadwal — semua via jaringan lokal sekolah.
+            </p>
           </div>
+
+          <div class="banner-illustration" style="font-size: 72px; position: relative; z-index: 2; animation: floatAnim 3s ease-in-out infinite; user-select: none; padding-right: 16px;">
+            🚀
+          </div>
+        </div>
+
+        <!-- Kolom Pencarian yang Lebih Interaktif -->
+        <section class="student-search" style="position: relative; margin-bottom: 32px;">
+          <span style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); font-size: 18px;">🔍</span>
+          <input type="text" id="searchSubject" placeholder="Cari materi, quiz, atau nama kelas yang mau kamu pelajari..." 
+                 style="width: 100%; padding: 16px 20px 16px 52px; border: 2px solid var(--border-subtle, #e2e8f0); border-radius: 999px; font-size: 0.975rem; font-weight: 500; color: var(--text-primary, #1e293b); background: var(--bg-secondary, #fff); outline: none; transition: all 0.2s ease; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.01);"
+                 onfocus="this.style.borderColor='var(--accent, #3b82f6)'; this.style.boxShadow='0 10px 15px -3px rgba(59,130,246,0.1)';"
+                 onblur="this.style.borderColor='var(--border-subtle, #e2e8f0)'; this.style.boxShadow='0 4px 6px -1px rgba(0,0,0,0.01)';">
         </section>
+
+        <section class="subjects" style="margin-bottom:28px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <h2>📚 Mata Pelajaran</h2>
+            <a href="#" onclick="showView('courses');return false;">Lihat Semua</a>
+          </div>
+          <div id="dashboardSubjects" class="subject-list"></div>
+        </section>
+
+
+        
 
         <div class="edw-blocks-grid">
           <div class="edw-block">
@@ -131,12 +168,36 @@
         </div>
       </div>
 
+     <!-- MODIFIKASI VIEW LAB VIRTUAL MURID -->
+      <div id="view-laboratorium" class="hidden">
+        <header class="edw-page-header">
+          <h1>🧪 Laboratorium Virtual</h1>
+        </header>
+
+        <div class="card mt-md" style="max-width: 400px; padding: 16px; border-radius: 20px; border: 2px solid var(--border-subtle, #e2e8f0); background: var(--bg-secondary, #fff);">
+          <label class="text-xs font-bold mb-xs block" style="display:block; margin-bottom: 6px; font-size: 12px; font-weight: bold;">Pilih Eksperimen Simulasi:</label>
+          <select class="select input" id="studentLabSelect" onchange="gantiSimulasiMurid(this.value)" style="width: 100%; padding: 8px; border-radius: 8px;">
+            <option value="">-- Pilih Simulasi --</option>
+            <option value="phet-simulations/curve-fitting_en.html">Simulasi Curve Fitting (Regresi Linear)</option>
+          </select>
+        </div>
+        
+        <div class="card mt-md" style="padding: 0; overflow: hidden; min-height: 600px; background: var(--bg-secondary, #fff); border-radius: 20px; border: 2px solid var(--border-subtle, #e2e8f0); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
+          <iframe id="labFrame" src="" width="100%" height="600px" style="border: none; display: none;"></iframe>
+          <div id="labPlaceholder" class="text-center" style="padding: 60px 20px;">
+            <div style="font-size: 64px; margin-bottom: 16px;">🔬</div>
+            <h3 style="color: var(--text-primary, #1e293b); font-weight: 700; margin-bottom: 8px;">Siap Melakukan Eksperimen?</h3>
+            <p style="color: var(--text-muted, #64748b); max-width: 450px; margin: 0 auto;">Pilih topik simulasi pada menu drop-down di atas atau lewat materi pelajaran untuk memuat simulasi di sini.</p>
+          </div>
+        </div>
+      </div>
+
       <!-- My courses view -->
       <div id="view-courses" class="hidden">
         <header class="edw-page-header"><h1>Kelas Saya</h1></header>
         <div class="edw-course-grid" id="courseGrid"></div>
       </div>
-
+      
       <!-- Course detail view -->
       <div id="view-course" class="hidden">
         <div class="edw-drawer-toggle-row">
@@ -222,13 +283,15 @@
     const recentCourses = JSON.parse(localStorage.getItem('edulan_recent') || '[]');
 
     function showView(name, courseId) {
-      ['dashboard','courses','course'].forEach(v => {
+      ['dashboard', 'courses', 'course', 'laboratorium'].forEach(v => {
         document.getElementById('view-' + v)?.classList.toggle('hidden', v !== name);
       });
+      
       document.body.classList.toggle('in-course', name === 'course');
       document.getElementById('courseBar')?.classList.toggle('show', name === 'course');
       setActiveNav(name === 'course' ? 'courses' : name);
       if (name === 'courses') renderCourseGrid();
+      renderDashboardSubjects();
       if (name === 'course' && courseId) openCourse(courseId);
       if (name === 'dashboard') { renderCalendarBlock(); renderTimelineBlock(); }
       closeAllDrawers();
@@ -261,23 +324,59 @@
     }
 
     function renderCourseGrid() {
-      const el = document.getElementById('courseGrid');
-      if (!coursesData.length) {
-        el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🏫</div><p>Belum ada kelas tersedia.</p></div>';
-        return;
-      }
-      el.innerHTML = coursesData.map((c, i) => {
-        const hues = ['#00b894,#013880','#6c5ce7,#013880','#e17055,#013880','#0984e3,#013880'];
-        const grad = hues[i % hues.length];
-        const pct = courseProgress(c.id, assignmentsData, submissionsData, currentUser?.studentId);
-        return `<a href="#" class="edw-course-card" onclick="showView('course','${c.id}');return false">
-          <div class="edw-course-card-banner" style="background:linear-gradient(135deg,${grad})"></div>
-          <div class="edw-course-card-body">
-            <h3>${escapeHtml(c.title)}</h3>
-            <p>${escapeHtml(c.description || 'Klik untuk membuka kelas')}</p>
-            <div class="edw-progress-wrap mt-sm"><div class="edw-progress" style="width:100%"><div class="edw-progress-bar" style="width:${pct}%"></div></div><span class="edw-progress-text">${pct}%</span></div>
-          </div>
-        </a>`;
+  const el = document.getElementById('courseGrid');
+  if (!coursesData.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🏫</div><p>Belum ada kelas tersedia.</p></div>';
+    return;
+  }
+  
+  // Kumpulan gradasi warna pastel & cerah ala Edutech modern
+  const playfulGradients = [
+    'linear-gradient(135deg, #00b894, #00cec9)', // Teal cerah
+    'linear-gradient(135deg, #6c5ce7, #a29bfe)', // Ungu ceria
+    'linear-gradient(135deg, #ff7675, #ff7675)', // Coral hangat
+    'linear-gradient(135deg, #0984e3, #74b9ff)', // Biru langit
+    'linear-gradient(135deg, #fdcb6e, #ffeaa7)', // Kuning cerah
+    'linear-gradient(135deg, #e84393, #fd79a8)'  // Pink playful
+  ];
+
+  // Kumpulan emoji akademis seru untuk ikon kelas
+  const courseEmojis = ['💻', '🔬', '📐', '🎨', '📚', '🚀', '🌍', '🧮'];
+
+  el.innerHTML = coursesData.map((c, i) => {
+    const grad = playfulGradients[i % playfulGradients.length];
+    const emoji = courseEmojis[i % courseEmojis.length];
+    const pct = courseProgress(c.id, assignmentsData, submissionsData, currentUser?.studentId);
+    
+    return `
+          <a href="#" class="edw-course-card" 
+            onclick="showView('course','${c.id}');return false"
+            style="display: block; text-decoration: none; background: var(--bg-secondary, #fff); border: 2px solid var(--border-subtle, #e2e8f0); border-radius: 20px; overflow: hidden; transition: all 0.2s ease-in-out; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);"
+            onmouseenter="this.style.transform='translateY(-6px)'; this.style.boxShadow='0 12px 20px rgba(0,0,0,0.06)'; this.style.borderColor='var(--accent, #3b82f6)';"
+            onmouseleave="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px -1px rgba(0,0,0,0.02)'; this.style.borderColor='var(--border-subtle, #e2e8f0)';">
+            
+            <!-- Banner Atas Kartu dengan Gradasi Cerah & Emoji Floating -->
+            <div class="edw-course-card-banner" style="background: ${grad}; height: 120px; position: relative; display: flex; align-items: center; justify-content: center;">
+              <span style="font-size: 48px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15));">${emoji}</span>
+            </div>
+            
+            <!-- Isi Konten Kartu (Menggunakan CSS Variables untuk Text & Progress Track) -->
+            <div class="edw-course-card-body" style="padding: 20px;">
+              <h3 style="margin: 0 0 6px 0; font-size: 1.2rem; font-weight: 700; color: var(--text-primary, #1e293b); line-height: 1.3;">${escapeHtml(c.title)}</h3>
+              <p style="margin: 0 0 16px 0; font-size: 0.875rem; color: var(--text-muted, #64748b); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 40px;">
+                ${escapeHtml(c.description || 'Klik untuk masuk dan mulai belajar bersama! ✨')}
+              </p>
+              
+              <!-- Indikator Progress Belajar yang Lebih Playful -->
+              <div class="edw-progress-wrap" style="display: flex; align-items: center; gap: 12px; margin-top: auto;">
+                <div class="edw-progress" style="flex: 1; height: 10px; background: var(--bg-primary, #f1f5f9); border-radius: 999px; overflow: hidden;">
+                  <div class="edw-progress-bar" style="width: ${pct}%; height: 100%; background: linear-gradient(90deg, #3b82f6, #60a5fa); border-radius: 999px; transition: width 0.4s ease;"></div>
+                </div>
+                <span class="edw-progress-text" style="font-size: 0.8125rem; font-weight: 700; color: var(--accent, #3b82f6); min-width: 35px; text-align: right;">${pct}%</span>
+              </div>
+            </div>
+
+          </a>`;
       }).join('');
     }
 
@@ -308,27 +407,46 @@
     }
 
     function renderCourseSections(course) {
-      const mats = materialsData.filter(m => m.courseId === course.id);
-      const assigns = assignmentsData.filter(a => a.courseId === course.id);
-      const sections = [];
-      sections.push({ title: 'Pengantar', items: [
+  const mats = materialsData.filter(m => m.courseId === course.id);
+  const assigns = assignmentsData.filter(a => a.courseId === course.id);
+  const sections = [];
+  
+  sections.push({ 
+      title: '📢 Pengantar & Pengumuman', 
+      items: [
         ...(course.description ? [{ type: 'label', title: course.description, icon: 'forum' }] : []),
-      ]});
-      if (mats.length) sections.push({ title: 'Materi', items: mats.map(m => ({ type: 'material', data: m })) });
-      if (assigns.length) sections.push({ title: 'Tugas & Quiz', items: assigns.map(a => ({ type: 'assignment', data: a })) });
+      ]
+    });
+    if (mats.length) sections.push({ title: '📖 Materi Pembelajaran', items: mats.map(m => ({ type: 'material', data: m })) });
+    if (assigns.length) sections.push({ title: '🎯 Tugas & Quiz Tantangan', items: assigns.map(a => ({ type: 'assignment', data: a })) });
 
-      document.getElementById('courseSections').innerHTML = sections.filter(s => s.items.length).map((sec, si) => `
-        <li class="edw-section-card${si === 0 ? ' open' : ''}">
-          <div class="edw-section-header" onclick="toggleSectionCard(this)">
-            <h3>${escapeHtml(sec.title)}</h3>
-            <span class="edw-section-toggle">›</span>
-          </div>
-          <div class="edw-section-body">
-            ${sec.items.map(item => renderActivityItem(item)).join('')}
-          </div>
-        </li>
-      `).join('') || '<div class="empty-state"><p>Belum ada konten di kelas ini.</p></div>';
-    }
+    document.getElementById('courseSections').innerHTML = sections.filter(s => s.items.length).map((sec, si) => `
+      <li class="edw-section-card${si === 0 ? ' open' : ''}" 
+          style="border: 2px solid var(--border-subtle, #e2e8f0); border-radius: 16px; margin-bottom: 16px; background: var(--bg-secondary, #fff); overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
+        
+        <!-- Header Accordion (Mendukung Dark Mode) -->
+        <div class="edw-section-header" onclick="toggleSectionCard(this)" 
+            style="padding: 18px 24px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: var(--bg-primary, #f8fafc); border-bottom: 1px solid var(--border-subtle, #e2e8f0);">
+          
+          <h3 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: var(--text-primary, #1e293b);">
+            ${escapeHtml(sec.title)} 
+            <!-- Badge Angka Jumlah Item -->
+            <span style="font-size: 0.85rem; background: var(--border-subtle, #e2e8f0); color: var(--text-muted, #475569); padding: 2px 8px; border-radius: 999px; margin-left: 8px;">
+              ${sec.items.length}
+            </span>
+          </h3>
+          
+          <!-- Ikon Panah Toggle -->
+          <span class="edw-section-toggle" style="font-size: 1.5rem; color: var(--text-muted, #64748b); transition: transform 0.2s;">›</span>
+        </div>
+        
+        <!-- Body Accordion Tempat List Materi/Tugas -->
+        <div class="edw-section-body" style="padding: 12px 24px; background: var(--bg-secondary, #fff);">
+          ${sec.items.map(item => renderActivityItem(item)).join('')}
+        </div>
+      </li>
+    `).join('') || '<div class="empty-state"><div class="empty-state-icon">🎈</div><p>Belum ada konten di kelas ini. Tunggu gurumu mengunggahnya ya!</p></div>';
+  }
 
     function renderActivityItem(item) {
       if (item.type === 'label') {
@@ -450,7 +568,74 @@
       return list;
     }
 
-    async function loadStudentData() {
+    function gantiSimulasiMurid(urlSimulasi) {
+      const frame = document.getElementById('labFrame');
+      const placeholder = document.getElementById('labPlaceholder');
+      if (!frame || !placeholder) return;
+      
+      if (urlSimulasi) {
+        frame.src = '/' + urlSimulasi;
+        frame.style.display = 'block';
+        placeholder.style.display = 'none';
+      } else {
+        frame.src = '';
+        frame.style.display = 'none';
+        placeholder.style.display = 'block';
+      }
+    }
+
+    function renderDashboardSubjects() {
+      const container = document.getElementById('dashboardSubjects');
+      if (!container) return;
+      
+      // Daftar emoji ceria untuk mata pelajaran secara bergantian
+      const playfulEmojis = ['💻', '📐', '🧪', '🎨', '📚', '🧬', '🌍', '🧮', '🚀'];
+      
+      // Daftar kombinasi warna gradasi pastel yang hidup dan modern
+      const modernGradients = [
+        'linear-gradient(135deg, #eef2ff, #e0e7ff)', // Indigo lembut
+        'linear-gradient(135deg, #ecfdf5, #d1fae5)', // Hijau zamrud lembut
+        'linear-gradient(135deg, #fff7ed, #ffedd5)', // Oranye cerah
+        'linear-gradient(135deg, #fdf4ff, #fae8ff)', // Ungu playful
+        'linear-gradient(135deg, #fff1f2, #ffe4e6)', // Rose pink
+        'linear-gradient(135deg, #f0fdfa, #ccfbf1)'  // Teal segar
+      ];
+
+      container.innerHTML = coursesData.map((course, idx) => {
+        const emoji = playfulEmojis[idx % playfulEmojis.length];
+        const gradientBg = modernGradients[idx % modernGradients.length];
+        
+        return `
+          <div class="edw-course-card" 
+              style="min-width:240px; display:inline-block; margin-right:16px; cursor:pointer; 
+                      border-radius:20px; border:2px solid var(--border-subtle, #e2e8f0); background: var(--bg-secondary, #fff); transition:all 0.2s ease;"
+              onclick="showView('course','${course.id}')"
+              onmouseenter="this.style.transform='translateY(-6px)'; this.style.boxShadow='0 12px 24px rgba(0,0,0,0.06)'; this.style.borderColor='var(--accent,#3b82f6)';"
+              onmouseleave="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.style.borderColor='var(--border-subtle, #e2e8f0)';"
+          >
+            <div class="edw-course-card-body" style="padding: 20px;">
+              
+              <!-- Kontainer Ikon Edukatif -->
+              <div style="font-size: 30px; background: ${gradientBg}; width: 56px; height: 56px; 
+                          display: flex; align-items: center; justify-content: center; 
+                          border-radius: 16px; margin-bottom: 16px; box-shadow: inset 0 -2px 4px rgba(0,0,0,0.02);">
+                ${emoji}
+              </div>
+              
+              <h3 style="font-size: 1.15rem; color: var(--text-primary, #1e293b); margin: 0 0 6px 0; font-weight: 700;">${escapeHtml(course.title)}</h3>
+              <p style="font-size: 0.875rem; color: var(--text-muted, #64748b); margin: 0; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                ${escapeHtml(course.description || 'Yuk, buka kelas dan pelajari materinya! 🚀')}
+              </p>
+              
+              <div style="margin-top: 14px; font-size: 0.8125rem; color: var(--accent, #3b82f6); font-weight: 600; display: flex; align-items: center; gap: 4px;">
+                <span>Masuk Kelas</span> →
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+async function loadStudentData() {
       showPageLoader(true);
       try {
         const [courses, assignments, materials, libraryItems, submissions] = await Promise.all([
@@ -469,6 +654,7 @@
         renderCalendarBlock();
         renderTimelineBlock();
         renderCourseGrid();
+        renderDashboardSubjects();
       } catch {
         showToast('Gagal memuat data. Periksa koneksi ke server.', 'error');
       } finally {

@@ -44,7 +44,7 @@
       <div class="lq-hero">
         <div>
           <div class="badge badge-info mb-md">Live Quiz</div>
-          <h1>Kuis interaktif sedang dibuka</h1>
+          <h1>🎮 Kuis Interaktif Seru Sedang Dibuka!</h1>
           <p class="text-secondary mt-sm">Gabung ke live quiz yang sedang dibuka gurumu, lalu jawab secepat dan setepat mungkin.</p>
         </div>
         <button class="btn btn-sm btn-secondary" onclick="refreshQuizList()">Refresh</button>
@@ -54,8 +54,7 @@
         <h3>Gabung Live Quiz dengan Kode</h3>
         <p class="text-sm text-secondary mt-sm">Punya kode dari guru? Kuis privat tidak muncul di daftar bawah, masukkan kodenya di sini untuk langsung join.</p>
         <form class="flex gap-sm mt-md" style="flex-wrap:wrap" onsubmit="return submitJoinByCode(event)">
-          <input class="input" id="joinByCodeInput" placeholder="Kode Live Quiz" maxlength="6" style="max-width:220px;text-transform:uppercase;letter-spacing:2px" />
-          <button type="submit" class="btn btn-primary">Gabung</button>
+        <input class="input" id="joinByCodeInput" placeholder="👉 Masukkan Kode PIN Kuis" maxlength="6" style="max-width:220px;text-transform:uppercase;letter-spacing:2px; font-weight: bold; border: 2px solid var(--accent);" />          <button type="submit" class="btn btn-primary">Gabung</button>
         </form>
       </div>
 
@@ -178,20 +177,33 @@
     async function refreshQuizList() {
       try {
         const list = await api('/api/live-quiz?availableToJoin=true');
-        document.getElementById('joinableGrid').innerHTML = list.length ? list.map(q => `
-          <div class="lq-quiz-card">
-            <h3>${escapeHtml(q.title)}</h3>
-            <div class="lq-teacher">Oleh: ${escapeHtml(q.teacherName || 'Guru')}</div>
-            <div class="text-sm text-secondary">${q.totalQuestions} soal</div>
-            <div class="lq-quiz-card-footer">
-              <span class="badge badge-info">Terbuka</span>
-              <button class="btn btn-sm btn-primary" onclick="joinQuiz('${q.id}')">Join</button>
+        // Kumpulan emoji seru untuk dekorasi acak kartu kuis
+        const playfulIcons = ['🚀', '⚡', '🧠', '👾', '🏆', '🎯'];
+        
+        document.getElementById('joinableGrid').innerHTML = list.length ? list.map((q, idx) => {
+          const icon = playfulIcons[idx % playfulIcons.length];
+          return `
+            <div class="lq-quiz-card" 
+                 style="position:relative; cursor:pointer; padding:20px; transition:all 0.2s ease; border:2px solid var(--border-subtle, #e2e8f0); border-radius:16px; background:var(--bg-secondary, #fff);"
+                 onclick="joinQuiz('${q.id}')"
+                 onmouseenter="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.05)'; this.style.borderColor='var(--accent, #3b82f6)';"
+                 onmouseleave="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.style.borderColor='var(--border-subtle, #e2e8f0)';">
+              
+              <div style="font-size:32px; margin-bottom:12px;">${icon}</div>
+              <h3 style="margin:0 0 4px 0; font-size:1.2rem; color:var(--text-primary, #1e293b);">${escapeHtml(q.title)}</h3>
+              <div class="lq-teacher" style="font-size:0.875rem; color:var(--text-muted, #64748b); margin-bottom:8px;">👑 Oleh: ${escapeHtml(q.teacherName || 'Guru')}</div>
+              <div class="text-sm text-secondary" style="font-weight:600; color:var(--accent, #3b82f6);">📝 ${q.totalQuestions} Soal Tantangan</div>
+              
+              <div class="lq-quiz-card-footer" style="margin-top:16px; display:flex; justify-content:space-between; align-items:center;">
+                <span class="badge badge-info" style="background:rgba(59, 130, 246, 0.15); color:var(--accent, #2563eb); font-weight:bold; padding:4px 10px; border-radius:20px;">Ayo Gabung!</span>
+                <span style="font-weight:bold; color:var(--accent, #2563eb); display:flex; align-items:center; gap:4px;">Mulai <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+              </div>
             </div>
-          </div>
-        `).join('') : '<div class="empty-state"><div class="empty-state-icon">🎮</div><p>Belum ada live quiz yang dibuka guru saat ini.</p></div>';
+          `;
+        }).join('') : '<div class="empty-state"><div class="empty-state-icon">🎈</div><p>Belum ada live quiz yang aktif. Tunggu gurumu memulainya ya!</p></div>';
       } catch { showToast('Gagal memuat daftar live quiz.', 'error'); }
     }
-
+    
     async function joinQuiz(id) {
       try {
         await api(`/api/live-quiz/${id}/join`, {
@@ -237,9 +249,19 @@
           api(`/api/live-quiz/${joinedQuizId}/participants`)
         ]);
         document.getElementById('participantCount').textContent = participants.length;
-        document.getElementById('participantList').innerHTML = participants.length ? participants.map(p => `
-          <div class="lq-waiting-chip"><span class="lq-dot"></span>${escapeHtml(p.studentName)}${p.studentId === myStudentId ? ' (kamu)' : ''}</div>
-        `).join('') : '<p class="text-sm text-muted">Belum ada murid lain yang join.</p>';
+        document.getElementById('participantList').innerHTML = participants.length ? participants.map((p, idx) => {
+          // Variasi latar belakang pastel ceria untuk tiap nama anak
+          const colors = ['#e0f2fe', '#dcfce7', '#fef9c3', '#f3e8ff', '#ffe4e6'];
+          const textColors = ['#0369a1', '#15803d', '#a16207', '#6b21a8', '#9f1239'];
+          const bg = colors[idx % colors.length];
+          const text = textColors[idx % textColors.length];
+          
+          return `
+            <div class="lq-waiting-chip" style="background:${bg}; color:${text}; padding:8px 16px; border-radius:999px; font-weight:600; display:inline-flex; align-items:center; gap:6px; margin:6px; border:1px solid rgba(0,0,0,0.05);">
+              <span>👶</span> ${escapeHtml(p.studentName)}${p.studentId === myStudentId ? ' <strong>(Kamu)</strong>' : ''}
+            </div>
+          `;
+        }).join('') : '<p class="text-sm text-muted">Siap-siap! Jadi yang pertama bergabung di sini... 🕒</p>';
 
         if (quiz.status === 'countdown' || quiz.status === 'active') enterPlay(joinedQuizId);
       } catch {
