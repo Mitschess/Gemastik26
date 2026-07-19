@@ -103,5 +103,28 @@
     "totalAutoQuestions": 1,
     "earnedPoints": 0,
     "totalPoints": 1
+  },
+  {
+    "id": "f726eb5d-a83f-41e2-b1b5-a752bf02688d",
+    "studentId": "1",
+    "studentName": "murid1",
+    "assignmentId": "1783128986259",
+    "courseId": "1783061654349",
+    "content": "",
+    "answers": [
+      {
+        "questionId": "1783128986258",
+        "answer": "ads"
+      }
+    ],
+    "submittedAt": "2026-07-11T09:07:18.874Z",
+    "grade": 100,
+    "feedback": "Auto check: 1 dari 1 jawaban sesuai kunci.",
+    "gradedAt": "2026-07-11T09:07:18.874Z",
+    "autoChecked": true,
+    "correctCount": 1,
+    "totalAutoQuestions": 1,
+    "earnedPoints": 1,
+    "totalPoints": 1
   }
 ]
